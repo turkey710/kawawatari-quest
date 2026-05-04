@@ -1071,7 +1071,7 @@
             <input id="titleVolumeSlider" type="range" min="0" max="100" value="70">
             <span id="titleVolumeValue">70%</span>
           </label>
-          <p class="sound-note" id="titleMobileVolumeNotice" hidden>スマホでは本体の音量ボタンで調整してください</p>
+          <p class="sound-note" id="titleMobileVolumeNotice" hidden>スマホでは 本体の音量ボタンで ちょうせいしてね</p>
         </div>
       </div>
       <div class="title-help rpg-window" id="titleHelp" hidden>
@@ -1108,7 +1108,7 @@
           <input id="gameVolumeSlider" type="range" min="0" max="100" value="70">
           <span id="gameVolumeValue">70%</span>
         </label>
-        <p class="sound-note" id="gameMobileVolumeNotice" hidden>スマホでは本体の音量ボタンで調整してください</p>
+        <p class="sound-note" id="gameMobileVolumeNotice" hidden>スマホでは 本体の音量ボタンで ちょうせいしてね</p>
       </section>
 
       <section class="map-grid" aria-label="川渡りのマップ">
@@ -1458,6 +1458,7 @@
 
         if (isMobileAudioVolumeRestricted) {
           [elements.titleVolumeControl, elements.gameVolumeControl].forEach((control) => {
+            control.hidden = true;
             control.classList.add("mobile-volume-disabled");
           });
           [elements.titleVolumeSlider, elements.gameVolumeSlider].forEach((slider) => {
@@ -1466,6 +1467,18 @@
           });
           [elements.titleMobileVolumeNotice, elements.gameMobileVolumeNotice].forEach((notice) => {
             notice.hidden = false;
+          });
+        } else {
+          [elements.titleVolumeControl, elements.gameVolumeControl].forEach((control) => {
+            control.hidden = false;
+            control.classList.remove("mobile-volume-disabled");
+          });
+          [elements.titleVolumeSlider, elements.gameVolumeSlider].forEach((slider) => {
+            slider.disabled = false;
+            slider.removeAttribute("aria-disabled");
+          });
+          [elements.titleMobileVolumeNotice, elements.gameMobileVolumeNotice].forEach((notice) => {
+            notice.hidden = true;
           });
         }
       }
