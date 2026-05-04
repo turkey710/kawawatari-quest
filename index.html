@@ -280,6 +280,18 @@
       cursor: pointer;
     }
 
+    .sound-note {
+      margin: 0;
+      color: #aeb8ca;
+      font-size: 0.8rem;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .volume-control.mobile-volume-disabled {
+      opacity: 0.6;
+    }
+
     .title-help {
       position: relative;
       z-index: 1;
@@ -330,6 +342,10 @@
 
     .sound-bar .volume-control {
       min-width: 0;
+    }
+
+    .sound-bar .sound-note {
+      grid-column: 1 / -1;
     }
 
     .status-item {
@@ -1050,11 +1066,12 @@
             <button class="command-button bgm-option" type="button" data-bgm="game2" aria-pressed="false">BGM 2</button>
           </div>
           <button class="command-button sound-toggle" id="titleSoundButton" type="button">サウンド OFF</button>
-          <label class="volume-control">
+          <label class="volume-control" id="titleVolumeControl">
             <span>おんりょう</span>
             <input id="titleVolumeSlider" type="range" min="0" max="100" value="70">
             <span id="titleVolumeValue">70%</span>
           </label>
+          <p class="sound-note" id="titleMobileVolumeNotice" hidden>スマホでは本体の音量ボタンで調整してください</p>
         </div>
       </div>
       <div class="title-help rpg-window" id="titleHelp" hidden>
@@ -1086,11 +1103,12 @@
 
       <section class="sound-bar rpg-window" aria-label="サウンド設定">
         <button class="command-button sound-toggle" id="gameSoundButton" type="button">サウンド OFF</button>
-        <label class="volume-control">
+        <label class="volume-control" id="gameVolumeControl">
           <span>おんりょう</span>
           <input id="gameVolumeSlider" type="range" min="0" max="100" value="70">
           <span id="gameVolumeValue">70%</span>
         </label>
+        <p class="sound-note" id="gameMobileVolumeNotice" hidden>スマホでは本体の音量ボタンで調整してください</p>
       </section>
 
       <section class="map-grid" aria-label="川渡りのマップ">
@@ -1219,6 +1237,10 @@
         gameVolumeSlider: document.querySelector("#gameVolumeSlider"),
         titleVolumeValue: document.querySelector("#titleVolumeValue"),
         gameVolumeValue: document.querySelector("#gameVolumeValue"),
+        titleVolumeControl: document.querySelector("#titleVolumeControl"),
+        gameVolumeControl: document.querySelector("#gameVolumeControl"),
+        titleMobileVolumeNotice: document.querySelector("#titleMobileVolumeNotice"),
+        gameMobileVolumeNotice: document.querySelector("#gameMobileVolumeNotice"),
         bgmOptions: document.querySelectorAll("[data-bgm]"),
         leftBank: document.querySelector("#leftBank"),
         rightBank: document.querySelector("#rightBank"),
@@ -1255,6 +1277,11 @@
       const volumeState = {
         level: 0.7
       };
+      const isMobileAudioVolumeRestricted = (() => {
+        const touchCapable = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+        const mobileUa = /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+        return touchCapable && mobileUa;
+      })();
       let currentBgm = null;
 
       const AUDIO_SOURCES = {
@@ -1428,6 +1455,19 @@
         elements.bgmOptions.forEach((button) => {
           button.setAttribute("aria-pressed", String(button.dataset.bgm === selectedBgm));
         });
+
+        if (isMobileAudioVolumeRestricted) {
+          [elements.titleVolumeControl, elements.gameVolumeControl].forEach((control) => {
+            control.classList.add("mobile-volume-disabled");
+          });
+          [elements.titleVolumeSlider, elements.gameVolumeSlider].forEach((slider) => {
+            slider.disabled = true;
+            slider.setAttribute("aria-disabled", "true");
+          });
+          [elements.titleMobileVolumeNotice, elements.gameMobileVolumeNotice].forEach((notice) => {
+            notice.hidden = false;
+          });
+        }
       }
 
       function setSoundEnabled(enabled) {
@@ -1441,6 +1481,9 @@
       }
 
       function setVolume(percent) {
+        if (isMobileAudioVolumeRestricted) {
+          return;
+        }
         const nextVolume = Math.max(0, Math.min(100, Number(percent))) / 100;
         volumeState.level = Number.isFinite(nextVolume) ? nextVolume : volumeState.level;
         applyAudioSettings();
