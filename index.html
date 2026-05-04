@@ -1252,7 +1252,9 @@
       let soundEnabled = false;
       let selectedBgm = "game1";
       let titlePreviewBgm = false;
-      let volume = 0.7;
+      const volumeState = {
+        level: 0.7
+      };
       let currentBgm = null;
 
       const AUDIO_SOURCES = {
@@ -1278,7 +1280,7 @@
         const sound = new Audio(src);
         sound.preload = key === "select" || key === "boat" || key === "error" ? "auto" : "metadata";
         sound.loop = key === "title" || key === "game1" || key === "game2";
-        sound.volume = volume;
+        sound.volume = 1;
         sound.addEventListener("error", () => {
           sound.dataset.failed = "true";
         });
@@ -1323,7 +1325,7 @@
 
         try {
           sound.muted = false;
-          sound.volume = volume;
+          applyVolume(sound);
           if (options.restart) {
             sound.currentTime = 0;
           }
@@ -1337,10 +1339,22 @@
         }
       }
 
+      function getEffectiveVolume() {
+        return soundEnabled ? volumeState.level : 0;
+      }
+
+      function applyVolume(sound) {
+        if (!sound) {
+          return;
+        }
+
+        sound.volume = getEffectiveVolume();
+      }
+
       function applyAudioSettings() {
         availableAudio().forEach((sound) => {
-          sound.volume = volume;
-          sound.muted = !soundEnabled;
+          applyVolume(sound);
+          sound.muted = !soundEnabled || volumeState.level <= 0;
           if (!soundEnabled) {
             safePause(sound, false);
           }
@@ -1405,9 +1419,9 @@
         elements.titleSoundButton.textContent = soundLabel;
         elements.gameSoundButton.textContent = soundLabel;
 
-        const percent = `${Math.round(volume * 100)}%`;
-        elements.titleVolumeSlider.value = String(Math.round(volume * 100));
-        elements.gameVolumeSlider.value = String(Math.round(volume * 100));
+        const percent = `${Math.round(volumeState.level * 100)}%`;
+        elements.titleVolumeSlider.value = String(Math.round(volumeState.level * 100));
+        elements.gameVolumeSlider.value = String(Math.round(volumeState.level * 100));
         elements.titleVolumeValue.textContent = percent;
         elements.gameVolumeValue.textContent = percent;
 
@@ -1428,7 +1442,7 @@
 
       function setVolume(percent) {
         const nextVolume = Math.max(0, Math.min(100, Number(percent))) / 100;
-        volume = Number.isFinite(nextVolume) ? nextVolume : volume;
+        volumeState.level = Number.isFinite(nextVolume) ? nextVolume : volumeState.level;
         applyAudioSettings();
         updateSoundControls();
 
