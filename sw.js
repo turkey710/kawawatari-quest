@@ -1,4 +1,4 @@
-const CACHE_NAME = "kawawatari-quest-v1";
+const CACHE_NAME = "kawawatari-quest-v2";
 
 const CACHE_URLS = [
   "./",
