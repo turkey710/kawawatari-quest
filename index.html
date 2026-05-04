@@ -1,0 +1,1941 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>かわわたりクエスト</title>
+  <meta name="description" content="家族と犬を全員むこう岸へ！レトロRPG風の川渡りパズルゲーム。スマホでも遊べます。">
+  <meta name="theme-color" content="#111827">
+  <link rel="icon" type="image/png" href="./images/favicon.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="./images/icon-512.png">
+  <link rel="apple-touch-icon" href="./images/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.json">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="かわわたりクエスト">
+  <meta property="og:description" content="家族と犬を全員むこう岸へ！レトロRPG風の川渡りパズルゲーム。スマホでも遊べます。">
+  <!-- 公開URLが決まったら og:url は絶対URLに差し替えてください -->
+  <meta property="og:url" content="./">
+  <!-- GitHub Pages公開後は絶対URLへの差し替えを推奨します -->
+  <meta property="og:image" content="./images/ogp.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="かわわたりクエスト">
+  <meta name="twitter:description" content="家族と犬を全員むこう岸へ！レトロRPG風の川渡りパズルゲーム。スマホでも遊べます。">
+  <!-- GitHub Pages公開後は絶対URLへの差し替えを推奨します -->
+  <meta name="twitter:image" content="./images/ogp.png">
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --black: #090a0d;
+      --ink: #f8f8f8;
+      --soft: #d9dde7;
+      --line: #ffffff;
+      --line-dark: #151820;
+      --grass-a: #3c9c4a;
+      --grass-b: #2f7d3b;
+      --grass-c: #6cc96b;
+      --river-a: #2c89cf;
+      --river-b: #4cb7ef;
+      --river-c: #155f9a;
+      --dirt-a: #b77a3b;
+      --dirt-b: #8b542c;
+      --wood-a: #b86c2f;
+      --wood-b: #6b3b22;
+      --gold: #ffd866;
+      --danger: #ff5a6e;
+      --ok: #74f2a7;
+      --panel: #0b0d12;
+      --pixel-shadow: 4px 4px 0 #000;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html {
+      min-height: 100%;
+      background: #121820;
+    }
+
+    body {
+      min-height: 100%;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 0;
+      background:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%) 0 0 / 16px 16px,
+        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.04) 75%) 0 0 / 16px 16px,
+        #101720;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .game-shell {
+      width: min(1120px, 100%);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: clamp(10px, 3vw, 18px);
+    }
+
+    .screen {
+      min-height: calc(100dvh - clamp(20px, 6vw, 36px));
+    }
+
+    .rpg-window {
+      border: 4px solid var(--line);
+      outline: 4px solid var(--line-dark);
+      background: var(--panel);
+      color: var(--ink);
+      box-shadow: var(--pixel-shadow);
+    }
+
+    .command-button {
+      position: relative;
+      min-height: 46px;
+      padding: 10px 12px;
+      border: 4px solid var(--line);
+      outline: 3px solid var(--line-dark);
+      background: #11151e;
+      color: var(--ink);
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: 0;
+      text-align: left;
+      box-shadow: 3px 3px 0 #000;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .command-button::before {
+      content: "▶";
+      display: inline-block;
+      width: 1.25em;
+      color: var(--gold);
+    }
+
+    .command-button:hover,
+    .command-button:focus-visible {
+      background: #1a2230;
+      color: #fff7c2;
+    }
+
+    .command-button:focus-visible,
+    .unit-card:focus-visible {
+      outline-color: var(--gold);
+      outline-offset: 3px;
+    }
+
+    .command-button:active,
+    .unit-card:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0 #000;
+    }
+
+    .title-screen {
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      padding: 18px 0 24px;
+    }
+
+    .title-map {
+      position: absolute;
+      inset: 0;
+      border: 4px solid #263043;
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0 2px, transparent 2px 24px),
+        repeating-linear-gradient(90deg, transparent 0 28px, rgba(255, 255, 255, 0.06) 28px 30px),
+        linear-gradient(90deg, var(--grass-b) 0 39%, var(--river-c) 39% 43%, var(--river-b) 43% 57%, var(--river-c) 57% 61%, var(--grass-a) 61% 100%);
+      image-rendering: pixelated;
+    }
+
+    .title-map::before,
+    .title-map::after {
+      content: "";
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--grass-c);
+      box-shadow:
+        48px 32px 0 #2f7037,
+        96px 96px 0 #74c365,
+        156px 24px 0 #26612f,
+        248px 132px 0 #74c365,
+        324px 68px 0 #2f7037,
+        416px 164px 0 #74c365,
+        556px 46px 0 #26612f,
+        660px 118px 0 #74c365;
+      opacity: 0.82;
+    }
+
+    .title-map::before {
+      left: 8%;
+      top: 18%;
+    }
+
+    .title-map::after {
+      right: 7%;
+      bottom: 16%;
+      transform: translateX(-240px);
+    }
+
+    .title-card {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: min(620px, calc(100% - 18px));
+      gap: 16px;
+      padding: clamp(18px, 5vw, 34px);
+      text-align: center;
+    }
+
+    .title-kicker {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(0.78rem, 2.5vw, 0.95rem);
+      font-weight: 900;
+    }
+
+    .title-card h1 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(2rem, 8vw, 3.55rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+      word-break: keep-all;
+      text-shadow:
+        4px 0 0 #263043,
+        0 4px 0 #263043,
+        4px 4px 0 #000;
+    }
+
+    .title-card p {
+      margin: 0;
+      color: var(--soft);
+      font-size: clamp(0.98rem, 3.5vw, 1.22rem);
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .title-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .sound-panel {
+      display: grid;
+      gap: 10px;
+      margin-top: 2px;
+      padding: 10px;
+      border: 3px solid #343b4b;
+      background: #151a24;
+      text-align: left;
+    }
+
+    .sound-heading {
+      margin: 0;
+      color: var(--gold);
+      font-size: 0.92rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .bgm-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .bgm-option[aria-pressed="true"] {
+      background: #302a13;
+      color: #fff4b8;
+      border-color: var(--gold);
+    }
+
+    .volume-control {
+      display: grid;
+      grid-template-columns: auto minmax(110px, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      color: var(--soft);
+      font-size: 0.85rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .volume-control input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .title-help {
+      position: relative;
+      z-index: 1;
+      width: min(620px, calc(100% - 18px));
+      margin-top: 14px;
+      padding: 14px;
+    }
+
+    .title-help h2 {
+      margin: 0 0 8px;
+      color: var(--gold);
+      font-size: 1rem;
+    }
+
+    .title-help ul {
+      margin: 0;
+      padding-left: 1.2em;
+      color: var(--soft);
+      font-weight: 800;
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+
+    .game-screen {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .sound-bar {
+      display: grid;
+      grid-template-columns: minmax(160px, 0.55fr) minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+    }
+
+    .sound-bar .command-button {
+      min-height: 42px;
+    }
+
+    .sound-bar .volume-control {
+      min-width: 0;
+    }
+
+    .status-item {
+      min-width: 0;
+      padding: 6px 8px;
+      border: 3px solid #505767;
+      background: #151a24;
+    }
+
+    .status-label {
+      display: block;
+      color: #aeb8ca;
+      font-size: clamp(0.62rem, 2.6vw, 0.78rem);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .status-value {
+      display: block;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+      color: var(--gold);
+      font-size: clamp(0.86rem, 3.8vw, 1.18rem);
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .map-grid {
+      display: grid;
+      grid-template-columns: minmax(90px, 1fr) minmax(86px, 0.72fr) minmax(90px, 1fr);
+      gap: 8px;
+      min-height: 570px;
+    }
+
+    .area {
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #253044;
+      box-shadow: 4px 4px 0 #000;
+      image-rendering: pixelated;
+    }
+
+    .bank {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+      background:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
+        linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%) 0 0 / 20px 20px,
+        var(--grass-a);
+    }
+
+    .bank.right {
+      background:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.08) 25%, transparent 25%) 0 0 / 20px 20px,
+        linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.1) 75%) 0 0 / 20px 20px,
+        #549f42;
+    }
+
+    .bank::before,
+    .bank::after {
+      content: "";
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #225a2d;
+      box-shadow:
+        28px 36px 0 #72ce69,
+        68px 10px 0 #266a33,
+        112px 80px 0 #72ce69,
+        146px 34px 0 #225a2d,
+        190px 122px 0 #72ce69,
+        232px 18px 0 #266a33;
+      opacity: 0.58;
+      pointer-events: none;
+    }
+
+    .bank::before {
+      left: 8px;
+      top: 58px;
+    }
+
+    .bank::after {
+      right: 190px;
+      bottom: 54px;
+    }
+
+    .river {
+      padding: 8px 5px;
+      background:
+        repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0 5px, transparent 5px 22px),
+        repeating-linear-gradient(90deg, transparent 0 18px, rgba(255, 255, 255, 0.1) 18px 22px),
+        linear-gradient(180deg, var(--river-b), var(--river-a) 50%, var(--river-c));
+    }
+
+    .river::before,
+    .river::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.24);
+      box-shadow:
+        0 42px 0 rgba(255, 255, 255, 0.14),
+        0 118px 0 rgba(255, 255, 255, 0.18),
+        0 208px 0 rgba(255, 255, 255, 0.12),
+        0 318px 0 rgba(255, 255, 255, 0.16);
+      pointer-events: none;
+    }
+
+    .river::before {
+      top: 42px;
+    }
+
+    .river::after {
+      bottom: 80px;
+    }
+
+    .area-title {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      min-height: 34px;
+      margin: 0;
+      padding: 5px 7px;
+      border: 3px solid #151820;
+      background: rgba(9, 10, 13, 0.82);
+      color: #fff;
+      font-size: clamp(0.78rem, 3vw, 1rem);
+      line-height: 1.1;
+    }
+
+    .area-count {
+      color: var(--gold);
+      white-space: nowrap;
+    }
+
+    .people-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+      gap: 8px;
+      align-content: start;
+      min-height: 0;
+    }
+
+    .unit-card {
+      display: grid;
+      grid-template-rows: 42px auto auto;
+      gap: 3px;
+      align-items: center;
+      justify-items: center;
+      min-width: 0;
+      min-height: 84px;
+      padding: 6px 4px;
+      border: 3px solid #11151e;
+      background: #f4efe1;
+      color: #161820;
+      box-shadow: 3px 3px 0 #000;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .unit-card[data-ready="true"] {
+      border-color: #fff;
+      background: #fff8d8;
+    }
+
+    .unit-card.in-boat {
+      grid-template-rows: 34px auto;
+      min-height: 64px;
+      padding: 5px 3px;
+      background: #ffe0a2;
+    }
+
+    .unit-name {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      font-size: clamp(0.7rem, 2.8vw, 0.86rem);
+      font-weight: 900;
+      line-height: 1.05;
+      text-align: center;
+    }
+
+    .unit-action {
+      display: inline-grid;
+      min-height: 18px;
+      place-items: center;
+      padding: 1px 4px;
+      border: 2px solid #11151e;
+      background: #11151e;
+      color: #fff;
+      font-size: clamp(0.58rem, 2.4vw, 0.68rem);
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .unit-card.in-boat .unit-action {
+      display: none;
+    }
+
+    .sprite {
+      position: relative;
+      display: block;
+      width: 36px;
+      height: 42px;
+      image-rendering: pixelated;
+    }
+
+    .unit-card.in-boat .sprite {
+      width: 30px;
+      height: 34px;
+      transform: scale(0.88);
+      transform-origin: center;
+    }
+
+    .sprite span {
+      position: absolute;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .sprite-person .hair {
+      left: 9px;
+      top: 0;
+      width: 18px;
+      height: 8px;
+      background: var(--hair);
+      box-shadow:
+        -4px 5px 0 var(--hair),
+        4px 5px 0 var(--hair);
+    }
+
+    .sprite-person .face {
+      left: 9px;
+      top: 8px;
+      width: 18px;
+      height: 14px;
+      background: var(--skin);
+      box-shadow:
+        -3px 4px 0 var(--skin),
+        3px 4px 0 var(--skin);
+    }
+
+    .sprite-person .eye-left,
+    .sprite-person .eye-right {
+      top: 13px;
+      width: 3px;
+      height: 3px;
+      background: #11151e;
+    }
+
+    .sprite-person .eye-left {
+      left: 13px;
+    }
+
+    .sprite-person .eye-right {
+      right: 13px;
+    }
+
+    .sprite-person .body {
+      left: 8px;
+      top: 23px;
+      width: 20px;
+      height: 13px;
+      background: var(--shirt);
+      box-shadow:
+        -5px 2px 0 var(--shirt),
+        5px 2px 0 var(--shirt);
+    }
+
+    .sprite-person .leg-left,
+    .sprite-person .leg-right {
+      top: 36px;
+      width: 8px;
+      height: 6px;
+      background: var(--pants);
+    }
+
+    .sprite-person .leg-left {
+      left: 9px;
+    }
+
+    .sprite-person .leg-right {
+      right: 9px;
+    }
+
+    .sprite-dog .dog-body {
+      left: 7px;
+      top: 23px;
+      width: 23px;
+      height: 12px;
+      background: var(--fur);
+      box-shadow: 0 6px 0 var(--fur-dark);
+    }
+
+    .sprite-dog .dog-head {
+      left: 5px;
+      top: 13px;
+      width: 16px;
+      height: 15px;
+      background: var(--fur);
+      box-shadow: 8px 4px 0 var(--fur);
+    }
+
+    .sprite-dog .dog-ear {
+      left: 4px;
+      top: 9px;
+      width: 7px;
+      height: 9px;
+      background: var(--fur-dark);
+      box-shadow: 10px 3px 0 var(--fur-dark);
+    }
+
+    .sprite-dog .dog-eye {
+      left: 17px;
+      top: 18px;
+      width: 3px;
+      height: 3px;
+      background: #11151e;
+    }
+
+    .sprite-dog .dog-tail {
+      right: 2px;
+      top: 18px;
+      width: 5px;
+      height: 13px;
+      background: var(--fur-dark);
+      transform: rotate(45deg);
+      transform-origin: bottom center;
+    }
+
+    .sprite-dog .dog-leg-a,
+    .sprite-dog .dog-leg-b {
+      top: 35px;
+      width: 5px;
+      height: 7px;
+      background: var(--fur-dark);
+    }
+
+    .sprite-dog .dog-leg-a {
+      left: 10px;
+    }
+
+    .sprite-dog .dog-leg-b {
+      right: 9px;
+    }
+
+    .boat-lane {
+      position: absolute;
+      z-index: 2;
+      inset: 54px 4px 80px;
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .boat-lane.left {
+      justify-content: flex-start;
+    }
+
+    .boat-lane.right {
+      justify-content: flex-end;
+    }
+
+    .boat {
+      display: grid;
+      align-content: end;
+      gap: 6px;
+      width: min(122px, 100%);
+      min-height: 250px;
+      padding: 0 4px 8px;
+      pointer-events: auto;
+    }
+
+    .boat-passengers {
+      display: grid;
+      gap: 6px;
+      align-content: end;
+      min-height: 142px;
+    }
+
+    .boat-empty {
+      display: grid;
+      min-height: 62px;
+      place-items: center;
+      padding: 5px;
+      border: 3px dashed rgba(255, 255, 255, 0.55);
+      background: rgba(0, 0, 0, 0.24);
+      color: #fff;
+      font-size: clamp(0.66rem, 2.7vw, 0.78rem);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .boat-body {
+      position: relative;
+      height: 54px;
+      border: 4px solid var(--wood-b);
+      background:
+        linear-gradient(90deg, transparent 0 8%, var(--wood-b) 8% 14%, transparent 14% 86%, var(--wood-b) 86% 92%, transparent 92%),
+        var(--wood-a);
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55);
+    }
+
+    .boat-body::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 10px;
+      height: 8px;
+      background: #ffd08a;
+    }
+
+    .boat-body::after {
+      content: "";
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: -12px;
+      height: 12px;
+      background: var(--wood-b);
+    }
+
+    .boat-label {
+      position: absolute;
+      inset: auto 4px 5px;
+      color: #fff8d6;
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-align: center;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    .command-area {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(160px, 0.65fr);
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .message-window {
+      min-height: 92px;
+      padding: 12px;
+      white-space: pre-line;
+      color: #fff;
+      font-weight: 900;
+      line-height: 1.55;
+    }
+
+    .message-window.success {
+      color: var(--ok);
+    }
+
+    .message-window.warn {
+      color: #ffe08a;
+    }
+
+    .command-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .guide-window {
+      margin-top: 10px;
+      padding: 12px;
+    }
+
+    .guide-window summary {
+      cursor: pointer;
+      color: var(--gold);
+      font-weight: 900;
+    }
+
+    .guide-window ul {
+      margin: 10px 0 0;
+      padding-left: 1.2em;
+      color: var(--soft);
+      font-size: 0.88rem;
+      font-weight: 800;
+      line-height: 1.6;
+    }
+
+    .overlay {
+      position: fixed;
+      z-index: 20;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background:
+        linear-gradient(45deg, rgba(0, 0, 0, 0.88) 25%, rgba(20, 20, 28, 0.9) 25% 50%, rgba(0, 0, 0, 0.88) 50% 75%, rgba(20, 20, 28, 0.9) 75%) 0 0 / 16px 16px;
+    }
+
+    .overlay-card {
+      width: min(520px, 100%);
+      padding: 18px;
+      text-align: center;
+    }
+
+    .overlay-title {
+      margin: 0 0 10px;
+      color: var(--danger);
+      font-size: clamp(2rem, 9vw, 3.3rem);
+      line-height: 1;
+      text-shadow: 3px 3px 0 #000;
+    }
+
+    .overlay-title.clear {
+      color: var(--ok);
+    }
+
+    .overlay-lead {
+      margin: 0 0 12px;
+      color: #fff;
+      font-size: clamp(1rem, 4vw, 1.2rem);
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .reason-list {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 14px;
+      padding: 0;
+      list-style: none;
+      text-align: left;
+    }
+
+    .reason-list li {
+      padding: 8px;
+      border: 3px solid #343b4b;
+      background: #151a24;
+      color: #ffe8e8;
+      font-size: 0.88rem;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    .overlay-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .overlay-actions.single {
+      grid-template-columns: 1fr;
+    }
+
+    .ending-screen {
+      display: grid;
+      place-items: center;
+      padding: clamp(10px, 4vw, 22px) 0;
+    }
+
+    .ending-card {
+      display: grid;
+      gap: 18px;
+      width: min(720px, 100%);
+      padding: clamp(18px, 5vw, 34px);
+      text-align: center;
+    }
+
+    .ending-title {
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(1.05rem, 4vw, 1.45rem);
+      line-height: 1.5;
+    }
+
+    .ending-story {
+      margin: 0;
+      white-space: pre-line;
+      color: var(--soft);
+      font-size: clamp(0.95rem, 3.8vw, 1.18rem);
+      font-weight: 900;
+      line-height: 1.8;
+    }
+
+    .ending-end {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(3.4rem, 18vw, 7rem);
+      line-height: 1;
+      text-shadow:
+        5px 0 0 #263043,
+        0 5px 0 #263043,
+        5px 5px 0 #000;
+    }
+
+    @media (max-width: 720px) {
+      .game-shell {
+        padding: 8px;
+      }
+
+      .game-screen {
+        gap: 8px;
+      }
+
+      .status-bar {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 5px;
+        padding: 7px;
+      }
+
+      .sound-bar {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 8px;
+      }
+
+      .status-item {
+        padding: 5px;
+      }
+
+      .map-grid {
+        grid-template-columns: minmax(78px, 1fr) minmax(72px, 0.72fr) minmax(78px, 1fr);
+        gap: 5px;
+        min-height: 610px;
+      }
+
+      .bank {
+        padding: 6px 4px;
+      }
+
+      .area-title {
+        min-height: 30px;
+        padding: 4px;
+      }
+
+      .people-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .unit-card {
+        grid-template-rows: 34px auto auto;
+        min-height: 72px;
+        padding: 4px 3px;
+      }
+
+      .sprite {
+        transform: scale(0.86);
+        transform-origin: center top;
+      }
+
+      .boat-lane {
+        inset: 48px 3px 76px;
+      }
+
+      .boat {
+        min-height: 258px;
+        padding-inline: 1px;
+      }
+
+      .boat-passengers {
+        min-height: 140px;
+      }
+
+      .command-area {
+        grid-template-columns: 1fr;
+      }
+
+      .message-window {
+        min-height: 84px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .game-shell {
+        padding-inline: 5px;
+      }
+
+      .map-grid {
+        grid-template-columns: minmax(72px, 1fr) minmax(66px, 0.68fr) minmax(72px, 1fr);
+        gap: 4px;
+      }
+
+      .unit-name {
+        font-size: 0.68rem;
+      }
+
+      .unit-action {
+        font-size: 0.56rem;
+      }
+
+      .command-button {
+        padding-inline: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell">
+    <section class="screen title-screen" id="titleScreen" aria-labelledby="titleHeading">
+      <div class="title-map" aria-hidden="true"></div>
+      <div class="title-card rpg-window">
+        <p class="title-kicker">RETRO RIVER PUZZLE</p>
+        <h1 id="titleHeading">かわわたりクエスト</h1>
+        <p>家族と犬を 全員むこう岸へ！</p>
+        <div class="title-actions">
+          <button class="command-button" id="startButton" type="button">ぼうけんを はじめる</button>
+          <button class="command-button" id="howButton" type="button" aria-expanded="false" aria-controls="titleHelp">あそびかた</button>
+        </div>
+        <div class="sound-panel" aria-label="サウンド設定">
+          <p class="sound-heading">BGMをえらぶ</p>
+          <div class="bgm-options">
+            <button class="command-button bgm-option" type="button" data-bgm="game1" aria-pressed="true">BGM 1</button>
+            <button class="command-button bgm-option" type="button" data-bgm="game2" aria-pressed="false">BGM 2</button>
+          </div>
+          <button class="command-button sound-toggle" id="titleSoundButton" type="button">サウンド OFF</button>
+          <label class="volume-control">
+            <span>おんりょう</span>
+            <input id="titleVolumeSlider" type="range" min="0" max="100" value="70">
+            <span id="titleVolumeValue">70%</span>
+          </label>
+        </div>
+      </div>
+      <div class="title-help rpg-window" id="titleHelp" hidden>
+        <h2>あそびかた</h2>
+        <ul>
+          <li>カードをタップして、ふねに1人か2人のせます。</li>
+          <li>ふねをこげるのは、父・母・召使いだけです。</li>
+          <li>父と娘、母と息子、犬と家族の組み合わせには注意しましょう。</li>
+          <li>全員を右岸へ送ればクエストクリアです。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="screen game-screen" id="gameScreen" aria-label="かわわたりクエスト" hidden>
+      <header class="status-bar rpg-window" aria-label="ステータス">
+        <div class="status-item">
+          <span class="status-label">わたり かいすう</span>
+          <span class="status-value" id="moveCount">0かい</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">ふねの ばしょ</span>
+          <span class="status-value" id="boatSide">左岸</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">ふねの なか</span>
+          <span class="status-value" id="boatSeats">0/2</span>
+        </div>
+      </header>
+
+      <section class="sound-bar rpg-window" aria-label="サウンド設定">
+        <button class="command-button sound-toggle" id="gameSoundButton" type="button">サウンド OFF</button>
+        <label class="volume-control">
+          <span>おんりょう</span>
+          <input id="gameVolumeSlider" type="range" min="0" max="100" value="70">
+          <span id="gameVolumeValue">70%</span>
+        </label>
+      </section>
+
+      <section class="map-grid" aria-label="川渡りのマップ">
+        <section class="area bank left" aria-labelledby="leftTitle">
+          <h2 class="area-title" id="leftTitle">左岸 <span class="area-count" id="leftCount">8人</span></h2>
+          <div class="people-grid" id="leftBank"></div>
+        </section>
+
+        <section class="area river" aria-labelledby="riverTitle">
+          <h2 class="area-title" id="riverTitle">川 <span class="area-count">ふね</span></h2>
+          <div class="boat-lane left" id="boatLane">
+            <div class="boat" aria-label="ボート">
+              <div class="boat-passengers" id="boatPassengers"></div>
+              <div class="boat-body">
+                <div class="boat-label">BOAT</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="area bank right" aria-labelledby="rightTitle">
+          <h2 class="area-title" id="rightTitle">右岸 <span class="area-count" id="rightCount">0人</span></h2>
+          <div class="people-grid" id="rightBank"></div>
+        </section>
+      </section>
+
+      <section class="command-area" aria-label="コマンド">
+        <div class="message-window rpg-window" id="message" aria-live="polite">だれを のせますか？</div>
+        <div class="command-list">
+          <button class="command-button" id="crossButton" type="button">わたる</button>
+          <button class="command-button" id="resetButton" type="button">リセット</button>
+        </div>
+      </section>
+
+      <details class="guide-window rpg-window">
+        <summary>ルールを みる</summary>
+        <ul>
+          <li>ふねは1人または2人まで乗れます。</li>
+          <li>父・母・召使いの誰も乗っていないと、ふねは動きません。</li>
+          <li>母がいない岸で、父と娘Aまたは娘Bが一緒になると危険です。</li>
+          <li>父がいない岸で、母と息子Aまたは息子Bが一緒になると危険です。</li>
+          <li>召使いがいない岸で、犬と家族メンバーが一緒になると危険です。</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+
+  <div class="overlay" id="gameOverOverlay" hidden>
+    <div class="overlay-card rpg-window" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+      <h2 class="overlay-title" id="gameOverTitle">GAME OVER</h2>
+      <p class="overlay-lead">その わたりかたは きけんだ！</p>
+      <ul class="reason-list" id="gameOverReasons"></ul>
+      <div class="overlay-actions">
+        <button class="command-button" id="gameOverResetButton" type="button">もういちど</button>
+        <button class="command-button" id="continueButton" type="button">つづける</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="clearOverlay" hidden>
+    <div class="overlay-card rpg-window" role="dialog" aria-modal="true" aria-labelledby="clearTitle">
+      <h2 class="overlay-title clear" id="clearTitle">QUEST CLEAR</h2>
+      <p class="overlay-lead">みんなは ぶじに かわを わたりきった！</p>
+      <p class="overlay-lead" id="clearText">わたり かいすう 0かい</p>
+      <div class="overlay-actions">
+        <button class="command-button" id="endingButton" type="button">エンディングへ</button>
+        <button class="command-button" id="clearResetButton" type="button">もういちど あそぶ</button>
+      </div>
+    </div>
+  </div>
+
+  <section class="screen ending-screen" id="endingScreen" aria-labelledby="endingTitle" hidden>
+    <div class="ending-card rpg-window">
+      <h2 class="ending-title" id="endingTitle">そして ものがたりは おわりを むかえる……</h2>
+      <p class="ending-story">ながい たびの すえに
+みんなは ぶじに むこう岸へ たどりついた。
+
+ちいさな ふねと
+みんなの ちえが
+家族を まもったのだった。
+
+ありがとう。
+また いつか
+かわの ほとりで……</p>
+      <p class="ending-end">END</p>
+      <button class="command-button" id="endingResetButton" type="button">もういちど あそぶ</button>
+    </div>
+  </section>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const LEFT = "left";
+      const RIGHT = "right";
+      const SIDES = [LEFT, RIGHT];
+      const SIDE_LABEL = { left: "左岸", right: "右岸" };
+
+      const CHARACTERS = [
+        { id: "father", name: "父", driver: true, family: true, kind: "person", hair: "#3d2a1b", skin: "#e5ad75", shirt: "#3c67d6", pants: "#263043" },
+        { id: "mother", name: "母", driver: true, family: true, kind: "person", hair: "#5b3028", skin: "#efbd86", shirt: "#d84b74", pants: "#4d315f" },
+        { id: "sonA", name: "息子A", driver: false, family: true, kind: "person", hair: "#2b2119", skin: "#edbc82", shirt: "#4bb36d", pants: "#263043" },
+        { id: "sonB", name: "息子B", driver: false, family: true, kind: "person", hair: "#30251c", skin: "#eab477", shirt: "#e0a53a", pants: "#293556" },
+        { id: "daughterA", name: "娘A", driver: false, family: true, kind: "person", hair: "#6b3528", skin: "#f0bd86", shirt: "#b955d7", pants: "#4e3762" },
+        { id: "daughterB", name: "娘B", driver: false, family: true, kind: "person", hair: "#75402c", skin: "#efbb84", shirt: "#ef7b45", pants: "#5a3d32" },
+        { id: "servant", name: "召使い", driver: true, family: false, kind: "person", hair: "#253047", skin: "#d79b67", shirt: "#f4efe1", pants: "#2f7d3b" },
+        { id: "dog", name: "犬", driver: false, family: false, kind: "dog", fur: "#c07838", furDark: "#6f4328" }
+      ];
+
+      const CHARACTER_BY_ID = Object.fromEntries(CHARACTERS.map((character) => [character.id, character]));
+      const FAMILY_IDS = CHARACTERS.filter((character) => character.family).map((character) => character.id);
+      const DRIVER_IDS = CHARACTERS.filter((character) => character.driver).map((character) => character.id);
+      const SON_IDS = ["sonA", "sonB"];
+      const DAUGHTER_IDS = ["daughterA", "daughterB"];
+
+      const elements = {
+        titleScreen: document.querySelector("#titleScreen"),
+        gameScreen: document.querySelector("#gameScreen"),
+        endingScreen: document.querySelector("#endingScreen"),
+        startButton: document.querySelector("#startButton"),
+        howButton: document.querySelector("#howButton"),
+        titleHelp: document.querySelector("#titleHelp"),
+        titleSoundButton: document.querySelector("#titleSoundButton"),
+        gameSoundButton: document.querySelector("#gameSoundButton"),
+        titleVolumeSlider: document.querySelector("#titleVolumeSlider"),
+        gameVolumeSlider: document.querySelector("#gameVolumeSlider"),
+        titleVolumeValue: document.querySelector("#titleVolumeValue"),
+        gameVolumeValue: document.querySelector("#gameVolumeValue"),
+        bgmOptions: document.querySelectorAll("[data-bgm]"),
+        leftBank: document.querySelector("#leftBank"),
+        rightBank: document.querySelector("#rightBank"),
+        boatPassengers: document.querySelector("#boatPassengers"),
+        boatLane: document.querySelector("#boatLane"),
+        moveCount: document.querySelector("#moveCount"),
+        boatSide: document.querySelector("#boatSide"),
+        boatSeats: document.querySelector("#boatSeats"),
+        leftCount: document.querySelector("#leftCount"),
+        rightCount: document.querySelector("#rightCount"),
+        message: document.querySelector("#message"),
+        crossButton: document.querySelector("#crossButton"),
+        resetButton: document.querySelector("#resetButton"),
+        gameOverOverlay: document.querySelector("#gameOverOverlay"),
+        gameOverReasons: document.querySelector("#gameOverReasons"),
+        gameOverResetButton: document.querySelector("#gameOverResetButton"),
+        continueButton: document.querySelector("#continueButton"),
+        clearOverlay: document.querySelector("#clearOverlay"),
+        clearText: document.querySelector("#clearText"),
+        clearResetButton: document.querySelector("#clearResetButton"),
+        endingButton: document.querySelector("#endingButton"),
+        endingResetButton: document.querySelector("#endingResetButton")
+      };
+
+      let positions;
+      let boatSide;
+      let boatPassengers;
+      let moveCount;
+      let completed;
+      let activeScreen = "title";
+      let soundEnabled = false;
+      let selectedBgm = "game1";
+      let titlePreviewBgm = false;
+      let volume = 0.7;
+      let currentBgm = null;
+
+      const AUDIO_SOURCES = {
+        title: "audio/title.mp3",
+        game1: "audio/game.mp3",
+        game2: "audio/game2.mp3",
+        select: "audio/select.mp3",
+        boat: "audio/boat.mp3",
+        error: "audio/error.mp3",
+        gameover: "audio/gameover.mp3",
+        clear: "audio/clear.mp3",
+        ending: "audio/ending.mp3"
+      };
+
+      const CAN_USE_AUDIO = typeof Audio !== "undefined";
+      const audio = Object.fromEntries(Object.entries(AUDIO_SOURCES).map(([key, src]) => [key, createAudio(src, key)]));
+
+      function createAudio(src, key) {
+        if (!CAN_USE_AUDIO) {
+          return null;
+        }
+
+        const sound = new Audio(src);
+        sound.preload = key === "select" || key === "boat" || key === "error" ? "auto" : "metadata";
+        sound.loop = key === "title" || key === "game1" || key === "game2";
+        sound.volume = volume;
+        sound.addEventListener("error", () => {
+          sound.dataset.failed = "true";
+        });
+        return sound;
+      }
+
+      function createInitialPositions() {
+        return Object.fromEntries(CHARACTERS.map((character) => [character.id, LEFT]));
+      }
+
+      function opposite(side) {
+        return side === LEFT ? RIGHT : LEFT;
+      }
+
+      function names(ids) {
+        return ids.map((id) => CHARACTER_BY_ID[id].name).join("・");
+      }
+
+      function availableAudio() {
+        return Object.values(audio).filter(Boolean);
+      }
+
+      function safePause(sound, reset = false) {
+        if (!sound) {
+          return;
+        }
+
+        try {
+          sound.pause();
+          if (reset) {
+            sound.currentTime = 0;
+          }
+        } catch (error) {
+          // Audio failures should never stop the puzzle.
+        }
+      }
+
+      function safePlay(sound, options = {}) {
+        if (!sound || !soundEnabled || sound.dataset.failed === "true") {
+          return;
+        }
+
+        try {
+          sound.muted = false;
+          sound.volume = volume;
+          if (options.restart) {
+            sound.currentTime = 0;
+          }
+
+          const playResult = sound.play();
+          if (playResult && typeof playResult.catch === "function") {
+            playResult.catch(() => {});
+          }
+        } catch (error) {
+          // Some browsers block audio until a gesture. Keep the game moving.
+        }
+      }
+
+      function applyAudioSettings() {
+        availableAudio().forEach((sound) => {
+          sound.volume = volume;
+          sound.muted = !soundEnabled;
+          if (!soundEnabled) {
+            safePause(sound, false);
+          }
+        });
+      }
+
+      function stopBgm() {
+        safePause(currentBgm, true);
+        currentBgm = null;
+      }
+
+      function playBgm(key, options = {}) {
+        const nextBgm = audio[key];
+        if (!nextBgm) {
+          return;
+        }
+
+        if (currentBgm !== nextBgm) {
+          stopBgm();
+          currentBgm = nextBgm;
+          try {
+            currentBgm.currentTime = 0;
+          } catch (error) {}
+        } else if (options.restart) {
+          try {
+            currentBgm.currentTime = 0;
+          } catch (error) {}
+        }
+
+        safePlay(currentBgm);
+      }
+
+      function playScreenBgm(options = {}) {
+        if (activeScreen === "title") {
+          playBgm(titlePreviewBgm ? selectedBgm : "title", options);
+        } else if (activeScreen === "game") {
+          playBgm(selectedBgm, options);
+        } else if (activeScreen === "ending") {
+          playBgm("ending", { restart: true });
+        }
+      }
+
+      function playEffect(key) {
+        safePlay(audio[key], { restart: true });
+      }
+
+      function updateSoundControls() {
+        const soundLabel = soundEnabled ? "サウンド ON" : "サウンド OFF";
+        elements.titleSoundButton.textContent = soundLabel;
+        elements.gameSoundButton.textContent = soundLabel;
+
+        const percent = `${Math.round(volume * 100)}%`;
+        elements.titleVolumeSlider.value = String(Math.round(volume * 100));
+        elements.gameVolumeSlider.value = String(Math.round(volume * 100));
+        elements.titleVolumeValue.textContent = percent;
+        elements.gameVolumeValue.textContent = percent;
+
+        elements.bgmOptions.forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.dataset.bgm === selectedBgm));
+        });
+      }
+
+      function setSoundEnabled(enabled) {
+        soundEnabled = enabled;
+        applyAudioSettings();
+        updateSoundControls();
+
+        if (soundEnabled) {
+          playScreenBgm();
+        }
+      }
+
+      function setVolume(percent) {
+        const nextVolume = Math.max(0, Math.min(100, Number(percent))) / 100;
+        volume = Number.isFinite(nextVolume) ? nextVolume : volume;
+        applyAudioSettings();
+        updateSoundControls();
+
+        if (soundEnabled && currentBgm) {
+          safePlay(currentBgm);
+        }
+      }
+
+      function setSelectedBgm(nextBgm) {
+        if (!audio[nextBgm]) {
+          return;
+        }
+
+        selectedBgm = nextBgm;
+        updateSoundControls();
+
+        if (activeScreen === "title") {
+          titlePreviewBgm = true;
+          playBgm(selectedBgm, { restart: true });
+        } else if (activeScreen === "game") {
+          playBgm(selectedBgm, { restart: true });
+        }
+      }
+
+      function showScreen(name) {
+        activeScreen = name;
+        elements.titleScreen.hidden = name !== "title";
+        elements.gameScreen.hidden = name !== "game";
+        elements.endingScreen.hidden = name !== "ending";
+      }
+
+      function spriteMarkup(character) {
+        if (character.kind === "dog") {
+          return `
+            <span class="sprite sprite-dog" aria-hidden="true" style="--fur:${character.fur}; --fur-dark:${character.furDark};">
+              <span class="dog-tail"></span>
+              <span class="dog-body"></span>
+              <span class="dog-head"></span>
+              <span class="dog-ear"></span>
+              <span class="dog-eye"></span>
+              <span class="dog-leg-a"></span>
+              <span class="dog-leg-b"></span>
+            </span>
+          `;
+        }
+
+        return `
+          <span class="sprite sprite-person" aria-hidden="true" style="--hair:${character.hair}; --skin:${character.skin}; --shirt:${character.shirt}; --pants:${character.pants};">
+            <span class="hair"></span>
+            <span class="face"></span>
+            <span class="eye-left"></span>
+            <span class="eye-right"></span>
+            <span class="body"></span>
+            <span class="leg-left"></span>
+            <span class="leg-right"></span>
+          </span>
+        `;
+      }
+
+      function createPersonButton(character, inBoat = false) {
+        const button = document.createElement("button");
+        const ready = inBoat || positions[character.id] === boatSide;
+        const action = inBoat ? "おろす" : ready ? "のせる" : "まつ";
+
+        button.type = "button";
+        button.className = inBoat ? "unit-card in-boat" : "unit-card";
+        button.dataset.person = character.id;
+        button.dataset.ready = String(ready);
+        button.setAttribute("aria-label", `${character.name}を${inBoat ? "おろす" : "ボートにのせる"}`);
+        button.innerHTML = `
+          ${spriteMarkup(character)}
+          <span class="unit-name">${character.name}</span>
+          <span class="unit-action">${action}</span>
+        `;
+        return button;
+      }
+
+      function showMessage(text, type = "normal") {
+        elements.message.textContent = text;
+        elements.message.classList.toggle("success", type === "success");
+        elements.message.classList.toggle("warn", type === "warn");
+      }
+
+      function countPeopleOnSide(side) {
+        return CHARACTERS.filter((character) => positions[character.id] === side && !boatPassengers.includes(character.id)).length;
+      }
+
+      function render() {
+        elements.leftBank.innerHTML = "";
+        elements.rightBank.innerHTML = "";
+        elements.boatPassengers.innerHTML = "";
+
+        CHARACTERS.forEach((character) => {
+          if (boatPassengers.includes(character.id)) {
+            return;
+          }
+
+          const target = positions[character.id] === LEFT ? elements.leftBank : elements.rightBank;
+          target.appendChild(createPersonButton(character));
+        });
+
+        if (boatPassengers.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "boat-empty";
+          empty.textContent = "からっぽ";
+          elements.boatPassengers.appendChild(empty);
+        } else {
+          boatPassengers.forEach((id) => {
+            elements.boatPassengers.appendChild(createPersonButton(CHARACTER_BY_ID[id], true));
+          });
+        }
+
+        elements.boatLane.classList.toggle("left", boatSide === LEFT);
+        elements.boatLane.classList.toggle("right", boatSide === RIGHT);
+        elements.moveCount.textContent = `${moveCount}かい`;
+        elements.boatSide.textContent = SIDE_LABEL[boatSide];
+        elements.boatSeats.textContent = `${boatPassengers.length}/2`;
+        elements.leftCount.textContent = `${countPeopleOnSide(LEFT)}人`;
+        elements.rightCount.textContent = `${countPeopleOnSide(RIGHT)}人`;
+        elements.crossButton.disabled = completed;
+      }
+
+      function findDangerReasons(nextPositions) {
+        const reasons = [];
+
+        SIDES.forEach((side) => {
+          const peopleHere = CHARACTERS
+            .filter((character) => nextPositions[character.id] === side)
+            .map((character) => character.id);
+          const has = (id) => peopleHere.includes(id);
+          const label = SIDE_LABEL[side];
+
+          const daughtersWithFather = DAUGHTER_IDS.filter((id) => has(id));
+          if (has("father") && !has("mother") && daughtersWithFather.length > 0) {
+            reasons.push(`${label}で母がいないため、父と${names(daughtersWithFather)}が一緒になってしまいます。`);
+          }
+
+          const sonsWithMother = SON_IDS.filter((id) => has(id));
+          if (has("mother") && !has("father") && sonsWithMother.length > 0) {
+            reasons.push(`${label}で父がいないため、母と${names(sonsWithMother)}が一緒になってしまいます。`);
+          }
+
+          const familyWithDog = FAMILY_IDS.filter((id) => has(id));
+          if (has("dog") && !has("servant") && familyWithDog.length > 0) {
+            reasons.push(`${label}で召使いがいないため、犬と${names(familyWithDog)}が一緒になってしまいます。`);
+          }
+        });
+
+        return reasons;
+      }
+
+      function validateMove(currentPositions, currentBoatSide, passengers) {
+        if (passengers.length === 0) {
+          return { ok: false, reasons: ["だれも ふねに のっていません。1人か2人を のせてください。"] };
+        }
+
+        if (passengers.length > 2) {
+          return { ok: false, reasons: ["ふねに のれるのは 2人までです。"] };
+        }
+
+        if (!passengers.some((id) => DRIVER_IDS.includes(id))) {
+          return { ok: false, reasons: ["その くみあわせでは ふねを こげない！父・母・召使いの だれかを のせてください。"] };
+        }
+
+        if (!passengers.every((id) => currentPositions[id] === currentBoatSide)) {
+          return { ok: false, reasons: [`ふねは ${SIDE_LABEL[currentBoatSide]} にあります。同じ岸の なかまだけ のせられます。`] };
+        }
+
+        const nextPositions = { ...currentPositions };
+        const destination = opposite(currentBoatSide);
+        passengers.forEach((id) => {
+          nextPositions[id] = destination;
+        });
+
+        const dangerReasons = findDangerReasons(nextPositions);
+        if (dangerReasons.length > 0) {
+          return { ok: false, reasons: dangerReasons, nextPositions };
+        }
+
+        return { ok: true, reasons: [], nextPositions };
+      }
+
+      function isClearState(currentPositions) {
+        return CHARACTERS.every((character) => currentPositions[character.id] === RIGHT);
+      }
+
+      function showGameOver(reasons) {
+        elements.gameOverReasons.innerHTML = "";
+        reasons.forEach((reason) => {
+          const item = document.createElement("li");
+          item.textContent = reason;
+          elements.gameOverReasons.appendChild(item);
+        });
+
+        playEffect("error");
+        playEffect("gameover");
+        elements.gameOverOverlay.hidden = false;
+        showMessage("その わたりかたは きけんだ！\nつづける か もういちど を えらんでください。", "warn");
+      }
+
+      function closeGameOver() {
+        playEffect("select");
+        elements.gameOverOverlay.hidden = true;
+        showMessage("だれを のせますか？\nカードを タップして ふねに のせよう。");
+      }
+
+      function boardCharacter(id) {
+        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden) {
+          return;
+        }
+
+        if (boatPassengers.includes(id)) {
+          playEffect("select");
+          boatPassengers = boatPassengers.filter((passengerId) => passengerId !== id);
+          showMessage(`${CHARACTER_BY_ID[id].name} は ${SIDE_LABEL[boatSide]} に おりた。`);
+          render();
+          return;
+        }
+
+        if (positions[id] !== boatSide) {
+          showGameOver([`ふねは ${SIDE_LABEL[boatSide]} にあります。${SIDE_LABEL[boatSide]} の なかまだけ のせられます。`]);
+          return;
+        }
+
+        if (boatPassengers.length >= 2) {
+          showGameOver(["ふねに のれるのは 2人までです。"]);
+          return;
+        }
+
+        playEffect("select");
+        boatPassengers = [...boatPassengers, id];
+        showMessage(`${CHARACTER_BY_ID[id].name} が ふねに のった。\nつぎは だれを のせますか？`);
+        render();
+      }
+
+      function crossRiver() {
+        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden) {
+          return;
+        }
+
+        const result = validateMove(positions, boatSide, boatPassengers);
+        if (!result.ok) {
+          showGameOver(result.reasons);
+          return;
+        }
+
+        positions = result.nextPositions;
+        boatSide = opposite(boatSide);
+        boatPassengers = [];
+        moveCount += 1;
+        playEffect("boat");
+
+        if (isClearState(positions)) {
+          completed = true;
+          elements.clearText.textContent = `わたり かいすう ${moveCount}かい`;
+          elements.clearOverlay.hidden = false;
+          playEffect("clear");
+          showMessage("みんなは ぶじに かわを わたりきった！", "success");
+        } else {
+          showMessage(`ふねが ${SIDE_LABEL[boatSide]} へ わたった！\nだれを のせますか？`, "success");
+        }
+
+        render();
+      }
+
+      function resetGame() {
+        positions = createInitialPositions();
+        boatSide = LEFT;
+        boatPassengers = [];
+        moveCount = 0;
+        completed = false;
+        elements.gameOverOverlay.hidden = true;
+        elements.clearOverlay.hidden = true;
+        showMessage("だれを のせますか？\nカードを タップして ふねに のせよう。");
+        render();
+      }
+
+      function startGame() {
+        playEffect("select");
+        resetGame();
+        showScreen("game");
+        playBgm(selectedBgm, { restart: true });
+      }
+
+      function restartGame() {
+        playEffect("select");
+        resetGame();
+        showScreen("game");
+        playBgm(selectedBgm, { restart: true });
+      }
+
+      function showEnding() {
+        playEffect("select");
+        elements.clearOverlay.hidden = true;
+        showScreen("ending");
+        playBgm("ending", { restart: true });
+      }
+
+      function returnToTitle() {
+        playEffect("select");
+        resetGame();
+        showScreen("title");
+        playScreenBgm({ restart: true });
+      }
+
+      function registerServiceWorker() {
+        if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+          return;
+        }
+
+        if (typeof window === "undefined" || typeof window.addEventListener !== "function") {
+          return;
+        }
+
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js").catch((error) => {
+            console.warn("Service worker registration failed:", error);
+          });
+        });
+      }
+
+      function getAvailablePassengerCombos(currentPositions, side) {
+        const candidates = CHARACTERS
+          .filter((character) => currentPositions[character.id] === side)
+          .map((character) => character.id);
+        const combos = candidates.map((id) => [id]);
+
+        for (let i = 0; i < candidates.length; i += 1) {
+          for (let j = i + 1; j < candidates.length; j += 1) {
+            combos.push([candidates[i], candidates[j]]);
+          }
+        }
+
+        return combos;
+      }
+
+      function stateKey(currentPositions, currentBoatSide) {
+        return `${currentBoatSide}|${CHARACTERS.map((character) => currentPositions[character.id][0]).join("")}`;
+      }
+
+      function solvePuzzle() {
+        const startPositions = createInitialPositions();
+        const queue = [{ positions: startPositions, boatSide: LEFT, path: [] }];
+        const visited = new Set([stateKey(startPositions, LEFT)]);
+
+        while (queue.length > 0) {
+          const state = queue.shift();
+          if (isClearState(state.positions)) {
+            return state.path;
+          }
+
+          const combos = getAvailablePassengerCombos(state.positions, state.boatSide);
+          combos.forEach((passengers) => {
+            const result = validateMove(state.positions, state.boatSide, passengers);
+            if (!result.ok) {
+              return;
+            }
+
+            const nextBoatSide = opposite(state.boatSide);
+            const key = stateKey(result.nextPositions, nextBoatSide);
+            if (visited.has(key)) {
+              return;
+            }
+
+            visited.add(key);
+            queue.push({
+              positions: result.nextPositions,
+              boatSide: nextBoatSide,
+              path: [
+                ...state.path,
+                {
+                  from: SIDE_LABEL[state.boatSide],
+                  to: SIDE_LABEL[nextBoatSide],
+                  passengers: passengers.map((id) => CHARACTER_BY_ID[id].name)
+                }
+              ]
+            });
+          });
+        }
+
+        return null;
+      }
+
+      function runRuleTests() {
+        const testPositions = (leftIds) => {
+          const result = {};
+          CHARACTERS.forEach((character) => {
+            result[character.id] = leftIds.includes(character.id) ? LEFT : RIGHT;
+          });
+          return result;
+        };
+
+        const tests = [
+          {
+            name: "父と娘だけが母なしで同じ岸にいると危険",
+            pass: () => findDangerReasons(testPositions(["father", "sonA", "sonB", "daughterA"])).some((reason) => reason.includes("父と娘A"))
+          },
+          {
+            name: "母と息子だけが父なしで同じ岸にいると危険",
+            pass: () => findDangerReasons(testPositions(["mother", "sonA", "sonB", "daughterA", "daughterB"])).some((reason) => reason.includes("母と息子A・息子B"))
+          },
+          {
+            name: "犬と家族が召使いなしで同じ岸にいると危険",
+            pass: () => findDangerReasons(testPositions(["dog", "sonA"])).some((reason) => reason.includes("犬と息子A"))
+          },
+          {
+            name: "運転役なしの移動は不可",
+            pass: () => !validateMove(createInitialPositions(), LEFT, ["sonA", "daughterA"]).ok
+          },
+          {
+            name: "父と母の初手移動は安全",
+            pass: () => validateMove(createInitialPositions(), LEFT, ["father", "mother"]).ok
+          },
+          {
+            name: "父と娘Aの初手移動は危険で不可",
+            pass: () => !validateMove(createInitialPositions(), LEFT, ["father", "daughterA"]).ok
+          },
+          {
+            name: "全員右岸への解法が存在する",
+            pass: () => Array.isArray(solvePuzzle()) && solvePuzzle().length > 0
+          },
+          {
+            name: "初期表示はタイトル画面",
+            pass: () => !elements.titleScreen.hidden && elements.gameScreen.hidden
+          }
+        ];
+
+        const results = tests.map((test) => ({ name: test.name, passed: Boolean(test.pass()) }));
+        const allPassed = results.every((result) => result.passed);
+        console.table(results);
+        console.info(`かわわたりクエスト ルールテスト: ${allPassed ? "PASS" : "FAIL"}`);
+        console.info("確認済み解法:", solvePuzzle());
+        return { allPassed, results, solution: solvePuzzle() };
+      }
+
+      elements.startButton.addEventListener("click", startGame);
+
+      elements.howButton.addEventListener("click", () => {
+        playEffect("select");
+        const willOpen = elements.titleHelp.hidden;
+        elements.titleHelp.hidden = !willOpen;
+        elements.howButton.setAttribute("aria-expanded", String(willOpen));
+      });
+
+      elements.titleSoundButton.addEventListener("click", () => {
+        setSoundEnabled(!soundEnabled);
+      });
+
+      elements.gameSoundButton.addEventListener("click", () => {
+        setSoundEnabled(!soundEnabled);
+      });
+
+      elements.titleVolumeSlider.addEventListener("input", (event) => {
+        setVolume(event.target.value);
+      });
+
+      elements.gameVolumeSlider.addEventListener("input", (event) => {
+        setVolume(event.target.value);
+      });
+
+      elements.bgmOptions.forEach((button) => {
+        button.addEventListener("click", () => {
+          setSelectedBgm(button.dataset.bgm);
+        });
+      });
+
+      elements.leftBank.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-person]");
+        if (button) {
+          boardCharacter(button.dataset.person);
+        }
+      });
+
+      elements.rightBank.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-person]");
+        if (button) {
+          boardCharacter(button.dataset.person);
+        }
+      });
+
+      elements.boatPassengers.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-person]");
+        if (button) {
+          boardCharacter(button.dataset.person);
+        }
+      });
+
+      elements.crossButton.addEventListener("click", crossRiver);
+      elements.resetButton.addEventListener("click", restartGame);
+      elements.gameOverResetButton.addEventListener("click", restartGame);
+      elements.continueButton.addEventListener("click", closeGameOver);
+      elements.clearResetButton.addEventListener("click", restartGame);
+      elements.endingButton.addEventListener("click", showEnding);
+      elements.endingResetButton.addEventListener("click", returnToTitle);
+
+      window.riverQuest = {
+        characters: CHARACTERS,
+        findDangerReasons,
+        validateMove,
+        solvePuzzle,
+        runRuleTests,
+        resetGame,
+        startGame,
+        restartGame,
+        showEnding,
+        returnToTitle,
+        setSoundEnabled,
+        setSelectedBgm
+      };
+
+      resetGame();
+      updateSoundControls();
+      if (window.location && window.location.hash === "#game") {
+        showScreen("game");
+      } else {
+        showScreen("title");
+      }
+      registerServiceWorker();
+      runRuleTests();
+    })();
+  </script>
+</body>
+</html>

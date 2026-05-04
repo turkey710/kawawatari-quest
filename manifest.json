@@ -1,0 +1,23 @@
+{
+  "name": "かわわたりクエスト",
+  "short_name": "かわわたり",
+  "description": "家族と犬を全員むこう岸へ渡す、レトロRPG風の川渡りパズルゲーム。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "./images/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
