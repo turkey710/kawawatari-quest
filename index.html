@@ -1731,7 +1731,12 @@
         }
 
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js").catch((error) => {
+          const basePath = window.location.pathname.endsWith("/")
+            ? window.location.pathname
+            : `${window.location.pathname}/`;
+          const serviceWorkerUrl = new URL("sw.js", `${window.location.origin}${basePath}`);
+
+          navigator.serviceWorker.register(serviceWorkerUrl, { scope: basePath }).catch((error) => {
             console.warn("Service worker registration failed:", error);
           });
         });
