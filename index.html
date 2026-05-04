@@ -1352,6 +1352,19 @@
         currentBgm = null;
       }
 
+      const MUSIC_KEYS = ["title", "game1", "game2", "gameover", "clear", "ending"];
+
+      function stopMusic(key, reset = true) {
+        safePause(audio[key], reset);
+        if (currentBgm === audio[key]) {
+          currentBgm = null;
+        }
+      }
+
+      function stopAllMusic() {
+        MUSIC_KEYS.forEach((key) => stopMusic(key, true));
+      }
+
       function playBgm(key, options = {}) {
         const nextBgm = audio[key];
         if (!nextBgm) {
@@ -1359,7 +1372,7 @@
         }
 
         if (currentBgm !== nextBgm) {
-          stopBgm();
+          stopAllMusic();
           currentBgm = nextBgm;
           try {
             currentBgm.currentTime = 0;
@@ -1611,6 +1624,7 @@
         });
 
         playEffect("error");
+        stopAllMusic();
         playEffect("gameover");
         elements.gameOverOverlay.hidden = false;
         showMessage("その わたりかたは きけんだ！\nつづける か もういちど を えらんでください。", "warn");
@@ -1618,6 +1632,7 @@
 
       function closeGameOver() {
         playEffect("select");
+        stopMusic("gameover", true);
         elements.gameOverOverlay.hidden = true;
         showMessage("だれを のせますか？\nカードを タップして ふねに のせよう。");
       }
@@ -1672,6 +1687,7 @@
           completed = true;
           elements.clearText.textContent = `わたり かいすう ${moveCount}かい`;
           elements.clearOverlay.hidden = false;
+          stopAllMusic();
           playEffect("clear");
           showMessage("みんなは ぶじに かわを わたりきった！", "success");
         } else {
@@ -1702,6 +1718,7 @@
 
       function restartGame() {
         playEffect("select");
+        stopAllMusic();
         resetGame();
         showScreen("game");
         playBgm(selectedBgm, { restart: true });
@@ -1709,6 +1726,7 @@
 
       function showEnding() {
         playEffect("select");
+        stopMusic("clear", true);
         elements.clearOverlay.hidden = true;
         showScreen("ending");
         playBgm("ending", { restart: true });
