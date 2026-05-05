@@ -292,29 +292,6 @@
       opacity: 0.6;
     }
 
-    .title-help {
-      position: relative;
-      z-index: 1;
-      width: min(620px, calc(100% - 18px));
-      margin-top: 14px;
-      padding: 14px;
-    }
-
-    .title-help h2 {
-      margin: 0 0 8px;
-      color: var(--gold);
-      font-size: 1rem;
-    }
-
-    .title-help ul {
-      margin: 0;
-      padding-left: 1.2em;
-      color: var(--soft);
-      font-weight: 800;
-      line-height: 1.55;
-      font-size: 0.9rem;
-    }
-
     .game-screen {
       display: grid;
       grid-template-rows: auto minmax(0, 1fr) auto;
@@ -886,26 +863,6 @@
       gap: 8px;
     }
 
-    .guide-window {
-      margin-top: 10px;
-      padding: 12px;
-    }
-
-    .guide-window summary {
-      cursor: pointer;
-      color: var(--gold);
-      font-weight: 900;
-    }
-
-    .guide-window ul {
-      margin: 10px 0 0;
-      padding-left: 1.2em;
-      color: var(--soft);
-      font-size: 0.88rem;
-      font-weight: 800;
-      line-height: 1.6;
-    }
-
     .overlay {
       position: fixed;
       z-index: 20;
@@ -970,6 +927,62 @@
 
     .overlay-actions.single {
       grid-template-columns: 1fr;
+    }
+
+    .rules-overlay {
+      z-index: 26;
+    }
+
+    .rules-card {
+      width: min(760px, 100%);
+      max-height: min(88dvh, 920px);
+      padding: 16px;
+      text-align: left;
+      overflow-y: auto;
+    }
+
+    .rules-title {
+      margin: 0 0 10px;
+      color: var(--gold);
+      font-size: clamp(1.6rem, 7vw, 2.6rem);
+      line-height: 1.05;
+      text-shadow: 3px 3px 0 #000;
+      text-align: center;
+    }
+
+    .rules-section {
+      margin: 0 0 12px;
+      padding: 10px;
+      border: 3px solid #343b4b;
+      background: #151a24;
+    }
+
+    .rules-section h3 {
+      margin: 0 0 8px;
+      color: #fff4b8;
+      font-size: 1rem;
+    }
+
+    .rules-text {
+      margin: 0;
+      color: #f0f4ff;
+      font-size: 0.92rem;
+      font-weight: 900;
+      line-height: 1.7;
+      white-space: pre-line;
+    }
+
+    .rules-list {
+      margin: 0;
+      padding-left: 1.2em;
+      color: var(--soft);
+      font-size: 0.9rem;
+      font-weight: 800;
+      line-height: 1.7;
+    }
+
+    .rules-list li + li {
+      margin-top: 4px;
     }
 
     .ending-screen {
@@ -1099,6 +1112,12 @@
       .message-window {
         min-height: 84px;
       }
+
+      .rules-card {
+        width: min(100%, 98vw);
+        max-height: 94dvh;
+        padding: 12px;
+      }
     }
 
     @media (max-width: 380px) {
@@ -1135,7 +1154,7 @@
         <p>家族と犬を 全員むこう岸へ！</p>
         <div class="title-actions">
           <button class="command-button" id="startButton" type="button">ぼうけんを はじめる</button>
-          <button class="command-button" id="howButton" type="button" aria-expanded="false" aria-controls="titleHelp">あそびかた</button>
+          <button class="command-button" id="howButton" type="button">あそびかた</button>
         </div>
         <div class="sound-panel" aria-label="サウンド設定">
           <p class="sound-heading">BGMをえらぶ</p>
@@ -1151,15 +1170,6 @@
           </label>
           <p class="sound-note" id="titleMobileVolumeNotice" hidden>スマホでは 本体の音量ボタンで ちょうせいしてね</p>
         </div>
-      </div>
-      <div class="title-help rpg-window" id="titleHelp" hidden>
-        <h2>あそびかた</h2>
-        <ul>
-          <li>カードをタップして、ふねに1人か2人のせます。</li>
-          <li>ふねをこげるのは、父・母・召使いだけです。</li>
-          <li>父と娘、母と息子、犬と家族の組み合わせには注意しましょう。</li>
-          <li>全員を右岸へ送ればクエストクリアです。</li>
-        </ul>
       </div>
     </section>
 
@@ -1217,20 +1227,10 @@
         <div class="message-window rpg-window" id="message" aria-live="polite">だれを のせますか？</div>
         <div class="command-list">
           <button class="command-button" id="crossButton" type="button">わたる</button>
+          <button class="command-button" id="ruleButton" type="button">ルールをみる</button>
           <button class="command-button" id="resetButton" type="button">リセット</button>
         </div>
       </section>
-
-      <details class="guide-window rpg-window">
-        <summary>ルールを みる</summary>
-        <ul>
-          <li>ふねは1人または2人まで乗れます。</li>
-          <li>父・母・召使いの誰も乗っていないと、ふねは動きません。</li>
-          <li>母がいない岸で、父と娘Aまたは娘Bが一緒になると危険です。</li>
-          <li>父がいない岸で、母と息子Aまたは息子Bが一緒になると危険です。</li>
-          <li>召使いがいない岸で、犬と家族メンバーが一緒になると危険です。</li>
-        </ul>
-      </details>
     </section>
   </main>
 
@@ -1254,6 +1254,52 @@
       <div class="overlay-actions">
         <button class="command-button" id="endingButton" type="button">エンディングへ</button>
         <button class="command-button" id="clearResetButton" type="button">もういちど あそぶ</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay rules-overlay" id="rulesOverlay" hidden>
+    <div class="overlay-card rules-card rpg-window" role="dialog" aria-modal="true" aria-labelledby="rulesTitle">
+      <h2 class="rules-title" id="rulesTitle">あそびかた</h2>
+      <section class="rules-section">
+        <p class="rules-text">家族と犬を、ルールを守って全員むこう岸へ渡そう。
+ただし、岸に残る組み合わせをまちがえると危険なことが起こる。</p>
+      </section>
+      <section class="rules-section">
+        <h3>基本ルール</h3>
+        <ul class="rules-list">
+          <li>全員を右岸へ渡せば クリア。</li>
+          <li>ふねには 1人 または 2人まで 乗れる。</li>
+          <li>ふねを動かせるのは「父」「母」「召使い」だけ。</li>
+          <li>父・母・召使いの誰も乗っていない場合、ふねは動かせない。</li>
+          <li>ふねは 今いる岸から 反対の岸へ渡る。</li>
+          <li>危険な組み合わせになると GAME OVER。</li>
+        </ul>
+      </section>
+      <section class="rules-section">
+        <h3>危険な条件</h3>
+        <ul class="rules-list">
+          <li>母が同じ岸にいない時、父は 娘A・娘Bを 殺してしまう。</li>
+          <li>父が同じ岸にいない時、母は 息子A・息子Bを 殺してしまう。</li>
+          <li>召使いが同じ岸にいない時、犬は 家族を 襲って殺してしまう。</li>
+        </ul>
+      </section>
+      <section class="rules-section">
+        <h3>危険例</h3>
+        <p class="rules-text">母がいない岸で 父と娘たちだけになると、父は 娘たちを 殺してしまう。
+父がいない岸で 母と息子たちだけになると、母は 息子たちを 殺してしまう。
+召使いがいない岸で 犬と家族だけになると、犬は 家族を 襲って殺してしまう。</p>
+      </section>
+      <section class="rules-section">
+        <h3>補足</h3>
+        <ul class="rules-list">
+          <li>「父と娘だけ」「母と息子だけ」「犬と家族だけ」になる岸を作らないように注意。</li>
+          <li>右岸だけでなく、左岸に残った人たちの組み合わせにも注意。</li>
+          <li>ふねに3人目を乗せようとしても、GAME OVERにはならない。「ふねには 2人までしか のれない！」と表示される。</li>
+        </ul>
+      </section>
+      <div class="overlay-actions single">
+        <button class="command-button" id="closeRulesButton" type="button">とじる</button>
       </div>
     </div>
   </div>
@@ -1308,7 +1354,7 @@
         endingScreen: document.querySelector("#endingScreen"),
         startButton: document.querySelector("#startButton"),
         howButton: document.querySelector("#howButton"),
-        titleHelp: document.querySelector("#titleHelp"),
+        ruleButton: document.querySelector("#ruleButton"),
         titleSoundButton: document.querySelector("#titleSoundButton"),
         gameSoundButton: document.querySelector("#gameSoundButton"),
         titleVolumeSlider: document.querySelector("#titleVolumeSlider"),
@@ -1337,6 +1383,8 @@
         gameOverResetButton: document.querySelector("#gameOverResetButton"),
         continueButton: document.querySelector("#continueButton"),
         clearOverlay: document.querySelector("#clearOverlay"),
+        rulesOverlay: document.querySelector("#rulesOverlay"),
+        closeRulesButton: document.querySelector("#closeRulesButton"),
         clearText: document.querySelector("#clearText"),
         clearResetButton: document.querySelector("#clearResetButton"),
         endingButton: document.querySelector("#endingButton"),
@@ -1792,8 +1840,18 @@
         showMessage("だれを のせますか？\nカードを タップして ふねに のせよう。");
       }
 
+      function openRules() {
+        playEffect("select");
+        elements.rulesOverlay.hidden = false;
+      }
+
+      function closeRules() {
+        playEffect("select");
+        elements.rulesOverlay.hidden = true;
+      }
+
       function boardCharacter(id) {
-        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden) {
+        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden || !elements.rulesOverlay.hidden) {
           return;
         }
 
@@ -1822,7 +1880,7 @@
       }
 
       function crossRiver() {
-        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden) {
+        if (activeScreen !== "game" || completed || !elements.gameOverOverlay.hidden || !elements.clearOverlay.hidden || !elements.rulesOverlay.hidden) {
           return;
         }
 
@@ -2041,13 +2099,9 @@
       }
 
       elements.startButton.addEventListener("click", startGame);
-
-      elements.howButton.addEventListener("click", () => {
-        playEffect("select");
-        const willOpen = elements.titleHelp.hidden;
-        elements.titleHelp.hidden = !willOpen;
-        elements.howButton.setAttribute("aria-expanded", String(willOpen));
-      });
+      elements.howButton.addEventListener("click", openRules);
+      elements.ruleButton.addEventListener("click", openRules);
+      elements.closeRulesButton.addEventListener("click", closeRules);
 
       elements.titleSoundButton.addEventListener("click", () => {
         setSoundEnabled(!soundEnabled);
