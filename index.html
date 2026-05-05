@@ -812,6 +812,10 @@
       color: #ffe08a;
     }
 
+    .message-window.notice {
+      color: #fff4b8;
+    }
+
     .command-list {
       display: grid;
       grid-template-columns: 1fr;
@@ -1580,6 +1584,12 @@
         elements.message.textContent = text;
         elements.message.classList.toggle("success", type === "success");
         elements.message.classList.toggle("warn", type === "warn");
+        elements.message.classList.toggle("notice", type === "notice");
+      }
+
+      function showActionNotice(text) {
+        playEffect("error");
+        showMessage(text, "notice");
       }
 
       function countPeopleOnSide(side) {
@@ -1652,19 +1662,19 @@
 
       function validateMove(currentPositions, currentBoatSide, passengers) {
         if (passengers.length === 0) {
-          return { ok: false, reasons: ["だれも ふねに のっていません。1人か2人を のせてください。"] };
+          return { ok: false, type: "notice", reasons: ["だれも ふねに のっていません。1人か2人を のせてください。"] };
         }
 
         if (passengers.length > 2) {
-          return { ok: false, reasons: ["ふねに のれるのは 2人までです。"] };
+          return { ok: false, type: "notice", reasons: ["ふねには 2人までしか のれない！"] };
         }
 
         if (!passengers.some((id) => DRIVER_IDS.includes(id))) {
-          return { ok: false, reasons: ["その くみあわせでは ふねを こげない！父・母・召使いの だれかを のせてください。"] };
+          return { ok: false, type: "notice", reasons: ["その くみあわせでは ふねを こげない！父・母・召使いの だれかを のせてください。"] };
         }
 
         if (!passengers.every((id) => currentPositions[id] === currentBoatSide)) {
-          return { ok: false, reasons: [`ふねは ${SIDE_LABEL[currentBoatSide]} にあります。同じ岸の なかまだけ のせられます。`] };
+          return { ok: false, type: "notice", reasons: [`ふねは ${SIDE_LABEL[currentBoatSide]} にあります。同じ岸の なかまだけ のせられます。`] };
         }
 
         const nextPositions = { ...currentPositions };
@@ -1675,10 +1685,10 @@
 
         const dangerReasons = findDangerReasons(nextPositions);
         if (dangerReasons.length > 0) {
-          return { ok: false, reasons: dangerReasons, nextPositions };
+          return { ok: false, type: "danger", reasons: dangerReasons, nextPositions };
         }
 
-        return { ok: true, reasons: [], nextPositions };
+        return { ok: true, type: "success", reasons: [], nextPositions };
       }
 
       function isClearState(currentPositions) {
@@ -1721,12 +1731,12 @@
         }
 
         if (positions[id] !== boatSide) {
-          showGameOver([`ふねは ${SIDE_LABEL[boatSide]} にあります。${SIDE_LABEL[boatSide]} の なかまだけ のせられます。`]);
+          showActionNotice(`ふねは ${SIDE_LABEL[boatSide]} にあります。${SIDE_LABEL[boatSide]} の なかまだけ のせられます。`);
           return;
         }
 
         if (boatPassengers.length >= 2) {
-          showGameOver(["ふねに のれるのは 2人までです。"]);
+          showActionNotice("ふねには 2人までしか のれない！");
           return;
         }
 
@@ -1743,7 +1753,11 @@
 
         const result = validateMove(positions, boatSide, boatPassengers);
         if (!result.ok) {
-          showGameOver(result.reasons);
+          if (result.type === "danger") {
+            showGameOver(result.reasons);
+          } else {
+            showActionNotice(result.reasons.join("\n"));
+          }
           return;
         }
 
@@ -1929,6 +1943,13 @@
           {
             name: "全員右岸への解法が存在する",
             pass: () => Array.isArray(solvePuzzle()) && solvePuzzle().length > 0
+          },
+          {
+            name: "定員オーバーは操作案内でGAME OVERにしない",
+            pass: () => {
+              const result = validateMove(createInitialPositions(), LEFT, ["father", "mother", "servant"]);
+              return !result.ok && result.type === "notice" && result.reasons.includes("ふねには 2人までしか のれない！");
+            }
           },
           {
             name: "初期表示はタイトル画面",
