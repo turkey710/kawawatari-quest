@@ -790,11 +790,29 @@
       z-index: 1;
       display: grid;
       align-content: end;
-      gap: 5px;
+      gap: 6px;
       width: min(112px, 100%);
       min-height: 232px;
       padding: 0 3px 8px;
       pointer-events: auto;
+    }
+
+    .boat-cross {
+      width: 100%;
+      min-height: 42px;
+      padding: 8px 8px;
+      font-size: clamp(0.72rem, 2.4vw, 0.8rem);
+      line-height: 1.1;
+      text-align: center;
+    }
+
+    .boat-cross::before {
+      width: auto;
+      margin-right: 3px;
+    }
+
+    .boat-cross.is-inactive {
+      opacity: 0.62;
     }
 
     .boat-passengers {
@@ -1142,6 +1160,11 @@
         min-height: 126px;
       }
 
+      .boat-cross {
+        min-height: 46px;
+        padding: 10px 8px;
+      }
+
       .command-area {
         grid-template-columns: 1fr;
       }
@@ -1261,6 +1284,7 @@
               <div class="boat-body">
                 <div class="boat-label">BOAT</div>
               </div>
+              <button class="command-button boat-cross" id="crossButton" type="button" aria-label="ボートでわたる">わたる</button>
             </div>
           </div>
         </section>
@@ -1274,7 +1298,6 @@
       <section class="command-area" aria-label="コマンド">
         <div class="message-window rpg-window" id="message" aria-live="polite">だれを のせますか？</div>
         <div class="command-list">
-          <button class="command-button" id="crossButton" type="button">わたる</button>
           <button class="command-button" id="ruleButton" type="button">ルールをみる</button>
           <button class="command-button" id="resetButton" type="button">リセット</button>
         </div>
@@ -1787,7 +1810,10 @@
         elements.boatSeats.textContent = `${boatPassengers.length}/2`;
         elements.leftCount.textContent = `${countPeopleOnSide(LEFT)}人`;
         elements.rightCount.textContent = `${countPeopleOnSide(RIGHT)}人`;
+        const canCross = boatPassengers.length > 0 && !completed;
         elements.crossButton.disabled = completed;
+        elements.crossButton.classList.toggle("is-inactive", !canCross);
+        elements.crossButton.setAttribute("aria-disabled", String(!canCross));
       }
 
       function findDangerReasons(nextPositions) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "kawawatari-quest-v10-hidden-title-code";
+const CACHE_NAME = "kawawatari-quest-v11-boat-cross-button-near-boat";
 
 const CACHE_URLS = [
   "./",
