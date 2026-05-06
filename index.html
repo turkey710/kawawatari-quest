@@ -1014,13 +1014,17 @@
       margin-top: 4px;
     }
 
+    body.is-ending .game-shell {
+      min-height: auto !important;
+    }
+
     .screen.ending-screen {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: flex-start !important;
       align-items: center;
-      min-height: 100dvh;
-      padding: clamp(16px, 3vw, 32px) 16px 24px;
+      min-height: auto !important;
+      padding: clamp(16px, 2.5vw, 24px) 16px 24px;
       box-sizing: border-box;
       overflow-y: auto;
     }
@@ -1682,6 +1686,7 @@
 
       function showScreen(name) {
         activeScreen = name;
+        document.body.classList.toggle("is-ending", name === "ending");
         elements.titleScreen.hidden = name !== "title";
         elements.gameScreen.hidden = name !== "game";
         elements.endingScreen.hidden = name !== "ending";
