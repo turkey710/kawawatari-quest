@@ -1,4 +1,4 @@
-const CACHE_NAME = "kawawatari-quest-v5-rules-basic-only";
+const CACHE_NAME = "kawawatari-quest-v6-ending-image";
 
 const CACHE_URLS = [
   "./",
@@ -7,7 +7,8 @@ const CACHE_URLS = [
   "./images/ogp.png",
   "./images/icon-512.png",
   "./images/apple-touch-icon.png",
-  "./images/favicon.png"
+  "./images/favicon.png",
+  "./images/ending.png"
 ];
 
 self.addEventListener("install", (event) => {

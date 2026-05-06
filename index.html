@@ -986,9 +986,9 @@
     }
 
     .ending-screen {
-      display: grid;
-      place-items: center;
-      padding: clamp(10px, 4vw, 22px) 0;
+      align-content: start;
+      overflow-y: auto;
+      padding: clamp(10px, 3vw, 20px) 0 clamp(14px, 4vw, 26px);
     }
 
     .ending-card {
@@ -997,6 +997,14 @@
       width: min(720px, 100%);
       padding: clamp(18px, 5vw, 34px);
       text-align: center;
+    }
+
+    .ending-image {
+      max-width: 100%;
+      width: min(100%, 620px);
+      height: auto;
+      display: block;
+      margin: 0 auto 16px;
     }
 
     .ending-title {
@@ -1013,17 +1021,6 @@
       font-size: clamp(0.95rem, 3.8vw, 1.18rem);
       font-weight: 900;
       line-height: 1.8;
-    }
-
-    .ending-end {
-      margin: 0;
-      color: #fff;
-      font-size: clamp(3.4rem, 18vw, 7rem);
-      line-height: 1;
-      text-shadow:
-        5px 0 0 #263043,
-        0 5px 0 #263043,
-        5px 5px 0 #000;
     }
 
     @media (max-width: 720px) {
@@ -1117,6 +1114,14 @@
         width: min(100%, 98vw);
         max-height: 94dvh;
         padding: 12px;
+      }
+
+      .ending-screen {
+        padding: 10px 0 16px;
+      }
+
+      .ending-image {
+        width: min(100%, 540px);
       }
     }
 
@@ -1287,6 +1292,7 @@
 
   <section class="screen ending-screen" id="endingScreen" aria-labelledby="endingTitle" hidden>
     <div class="ending-card rpg-window">
+      <img class="ending-image" src="./images/ending.png" alt="かわわたりクエスト エンディング">
       <h2 class="ending-title" id="endingTitle">そして ものがたりは おわりを むかえる……</h2>
       <p class="ending-story">ながい たびの すえに
 みんなは ぶじに むこう岸へ たどりついた。
@@ -1298,7 +1304,6 @@
 ありがとう。
 また いつか
 かわの ほとりで……</p>
-      <p class="ending-end">END</p>
       <button class="command-button" id="endingResetButton" type="button">もういちど あそぶ</button>
     </div>
   </section>
