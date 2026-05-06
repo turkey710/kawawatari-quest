@@ -986,15 +986,20 @@
     }
 
     .ending-screen {
-      align-content: start;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
       overflow-y: auto;
-      padding: clamp(10px, 3vw, 20px) 0 clamp(14px, 4vw, 26px);
+      padding: 24px 0 26px;
     }
 
     .ending-card {
       display: grid;
       gap: 18px;
-      width: min(720px, 100%);
+      width: min(92vw, 720px);
+      margin-left: auto;
+      margin-right: auto;
       padding: clamp(18px, 5vw, 34px);
       text-align: center;
     }
@@ -1117,7 +1122,7 @@
       }
 
       .ending-screen {
-        padding: 10px 0 16px;
+        padding: 14px 0 16px;
       }
 
       .ending-image {
