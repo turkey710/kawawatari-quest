@@ -1,4 +1,4 @@
-const CACHE_NAME = "kawawatari-quest-v8-ending-dev-code";
+const CACHE_NAME = "kawawatari-quest-v9-ending-top-align";
 
 const CACHE_URLS = [
   "./",
