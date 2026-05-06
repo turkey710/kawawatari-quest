@@ -233,31 +233,33 @@
       margin-top: 4px;
     }
 
-    .dev-code {
-      margin-top: 4px;
+    .title-secret-code {
+      margin-top: 2px;
       padding: 6px 8px;
       border: 2px solid #2f3a4c;
       background: rgba(9, 12, 18, 0.72);
       color: var(--soft);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 800;
-      text-align: left;
+      text-align: center;
+      justify-self: center;
+      width: min(240px, 70%);
     }
 
-    .dev-code-label {
-      display: block;
-      margin-bottom: 4px;
-      color: #9da9c2;
-    }
-
-    .dev-code-input {
+    .title-secret-input {
       width: 100%;
       border: 2px solid #39455b;
       background: #11151e;
       color: #d8dfef;
-      padding: 6px 8px;
+      padding: 5px 7px;
       font: inherit;
-      font-size: 0.76rem;
+      font-size: 0.72rem;
+      text-align: center;
+    }
+
+    .title-secret-tap-target {
+      cursor: pointer;
+      touch-action: manipulation;
     }
 
     .sound-panel {
@@ -1189,15 +1191,14 @@
       <div class="title-map" aria-hidden="true"></div>
       <div class="title-card rpg-window">
         <p class="title-kicker">RETRO RIVER PUZZLE</p>
-        <h1 id="titleHeading">かわわたりクエスト</h1>
+        <h1 id="titleHeading" class="title-secret-tap-target">かわわたりクエスト</h1>
         <p>家族と犬を 全員むこう岸へ！</p>
         <div class="title-actions">
           <button class="command-button" id="startButton" type="button">ぼうけんを はじめる</button>
           <button class="command-button" id="howButton" type="button">あそびかた</button>
         </div>
-        <div class="dev-code" aria-label="開発用確認コード">
-          <label class="dev-code-label" for="titleDevCode">開発用（タイトル画面のみ）</label>
-          <input class="dev-code-input" id="titleDevCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="確認コード" autocomplete="off">
+        <div class="title-secret-code" id="titleSecretCodeWrap" hidden>
+          <input class="title-secret-input" id="titleDevCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="コード" autocomplete="off" aria-label="コード入力">
         </div>
         <div class="sound-panel" aria-label="サウンド設定">
           <p class="sound-heading">BGMをえらぶ</p>
@@ -1413,7 +1414,9 @@
         clearResetButton: document.querySelector("#clearResetButton"),
         endingButton: document.querySelector("#endingButton"),
         endingResetButton: document.querySelector("#endingResetButton"),
-        titleDevCode: document.querySelector("#titleDevCode")
+        titleDevCode: document.querySelector("#titleDevCode"),
+        titleSecretCodeWrap: document.querySelector("#titleSecretCodeWrap"),
+        titleHeading: document.querySelector("#titleHeading")
       };
 
       let positions;
@@ -1427,6 +1430,7 @@
       let titlePreviewBgm = false;
       const ENDING_DEV_CODE = "9214";
       let endingCodeProgress = "";
+      let titleTapCount = 0;
       const volumeState = {
         level: 0.7
       };
@@ -1979,6 +1983,13 @@
       function resetEndingCodeState() {
         endingCodeProgress = "";
         elements.titleDevCode.value = "";
+        titleTapCount = 0;
+        elements.titleSecretCodeWrap.hidden = true;
+      }
+
+      function revealTitleCodeInput() {
+        elements.titleSecretCodeWrap.hidden = false;
+        elements.titleDevCode.focus();
       }
 
       function tryOpenEndingWithCode(code) {
@@ -2009,6 +2020,16 @@
         }
 
         endingCodeProgress = event.key === ENDING_DEV_CODE[0] ? event.key : "";
+      }
+
+      function onTitleSecretTap() {
+        if (activeScreen !== "title") {
+          return;
+        }
+        titleTapCount += 1;
+        if (titleTapCount >= 5) {
+          revealTitleCodeInput();
+        }
       }
 
       function returnToTitle() {
@@ -2229,6 +2250,7 @@
           event.target.value = "";
         }
       });
+      elements.titleHeading.addEventListener("click", onTitleSecretTap);
       window.addEventListener("keydown", onTitleKeydown);
 
       window.riverQuest = {
