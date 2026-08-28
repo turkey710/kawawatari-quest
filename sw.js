@@ -1,4 +1,4 @@
-const CACHE_NAME = "kawawatari-quest-v11-boat-cross-button-near-boat";
+const CACHE_NAME = "kawawatari-quest-v12-remove-ending-dev-code";
 
 const CACHE_URLS = [
   "./",

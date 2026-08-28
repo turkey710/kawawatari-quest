@@ -233,35 +233,6 @@
       margin-top: 4px;
     }
 
-    .title-secret-code {
-      margin-top: 2px;
-      padding: 6px 8px;
-      border: 2px solid #2f3a4c;
-      background: rgba(9, 12, 18, 0.72);
-      color: var(--soft);
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-align: center;
-      justify-self: center;
-      width: min(240px, 70%);
-    }
-
-    .title-secret-input {
-      width: 100%;
-      border: 2px solid #39455b;
-      background: #11151e;
-      color: #d8dfef;
-      padding: 5px 7px;
-      font: inherit;
-      font-size: 0.72rem;
-      text-align: center;
-    }
-
-    .title-secret-tap-target {
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
     .sound-panel {
       display: grid;
       gap: 10px;
@@ -1218,14 +1189,11 @@
       <div class="title-map" aria-hidden="true"></div>
       <div class="title-card rpg-window">
         <p class="title-kicker">RETRO RIVER PUZZLE</p>
-        <h1 id="titleHeading" class="title-secret-tap-target">かわわたりクエスト</h1>
+        <h1 id="titleHeading">かわわたりクエスト</h1>
         <p>家族と犬を 全員むこう岸へ！</p>
         <div class="title-actions">
           <button class="command-button" id="startButton" type="button">ぼうけんを はじめる</button>
           <button class="command-button" id="howButton" type="button">あそびかた</button>
-        </div>
-        <div class="title-secret-code" id="titleSecretCodeWrap" hidden>
-          <input class="title-secret-input" id="titleDevCode" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="コード" autocomplete="off" aria-label="コード入力">
         </div>
         <div class="sound-panel" aria-label="サウンド設定">
           <p class="sound-heading">BGMをえらぶ</p>
@@ -1440,10 +1408,7 @@
         clearText: document.querySelector("#clearText"),
         clearResetButton: document.querySelector("#clearResetButton"),
         endingButton: document.querySelector("#endingButton"),
-        endingResetButton: document.querySelector("#endingResetButton"),
-        titleDevCode: document.querySelector("#titleDevCode"),
-        titleSecretCodeWrap: document.querySelector("#titleSecretCodeWrap"),
-        titleHeading: document.querySelector("#titleHeading")
+        endingResetButton: document.querySelector("#endingResetButton")
       };
 
       let positions;
@@ -1455,9 +1420,6 @@
       let soundEnabled = false;
       let selectedBgm = "game1";
       let titlePreviewBgm = false;
-      const ENDING_DEV_CODE = "9214";
-      let endingCodeProgress = "";
-      let titleTapCount = 0;
       const volumeState = {
         level: 0.7
       };
@@ -2011,63 +1973,10 @@
         playBgm("ending", { restart: true });
       }
 
-      function resetEndingCodeState() {
-        endingCodeProgress = "";
-        elements.titleDevCode.value = "";
-        titleTapCount = 0;
-        elements.titleSecretCodeWrap.hidden = true;
-      }
-
-      function revealTitleCodeInput() {
-        elements.titleSecretCodeWrap.hidden = false;
-        elements.titleDevCode.focus();
-      }
-
-      function tryOpenEndingWithCode(code) {
-        if (activeScreen !== "title" || code !== ENDING_DEV_CODE) {
-          return false;
-        }
-        showEnding();
-        resetEndingCodeState();
-        return true;
-      }
-
-      function onTitleKeydown(event) {
-        if (activeScreen !== "title" || event.ctrlKey || event.metaKey || event.altKey) {
-          return;
-        }
-        if (!/^[0-9]$/.test(event.key)) {
-          endingCodeProgress = "";
-          return;
-        }
-
-        const nextCode = `${endingCodeProgress}${event.key}`;
-        if (ENDING_DEV_CODE.startsWith(nextCode)) {
-          endingCodeProgress = nextCode;
-          if (endingCodeProgress === ENDING_DEV_CODE) {
-            tryOpenEndingWithCode(ENDING_DEV_CODE);
-          }
-          return;
-        }
-
-        endingCodeProgress = event.key === ENDING_DEV_CODE[0] ? event.key : "";
-      }
-
-      function onTitleSecretTap() {
-        if (activeScreen !== "title") {
-          return;
-        }
-        titleTapCount += 1;
-        if (titleTapCount >= 5) {
-          revealTitleCodeInput();
-        }
-      }
-
       function returnToTitle() {
         playEffect("select");
         resetGame();
         showScreen("title");
-        resetEndingCodeState();
         playScreenBgm({ restart: true });
       }
 
@@ -2090,127 +1999,6 @@
             console.warn("Service worker registration failed:", error);
           });
         });
-      }
-
-      function getAvailablePassengerCombos(currentPositions, side) {
-        const candidates = CHARACTERS
-          .filter((character) => currentPositions[character.id] === side)
-          .map((character) => character.id);
-        const combos = candidates.map((id) => [id]);
-
-        for (let i = 0; i < candidates.length; i += 1) {
-          for (let j = i + 1; j < candidates.length; j += 1) {
-            combos.push([candidates[i], candidates[j]]);
-          }
-        }
-
-        return combos;
-      }
-
-      function stateKey(currentPositions, currentBoatSide) {
-        return `${currentBoatSide}|${CHARACTERS.map((character) => currentPositions[character.id][0]).join("")}`;
-      }
-
-      function solvePuzzle() {
-        const startPositions = createInitialPositions();
-        const queue = [{ positions: startPositions, boatSide: LEFT, path: [] }];
-        const visited = new Set([stateKey(startPositions, LEFT)]);
-
-        while (queue.length > 0) {
-          const state = queue.shift();
-          if (isClearState(state.positions)) {
-            return state.path;
-          }
-
-          const combos = getAvailablePassengerCombos(state.positions, state.boatSide);
-          combos.forEach((passengers) => {
-            const result = validateMove(state.positions, state.boatSide, passengers);
-            if (!result.ok) {
-              return;
-            }
-
-            const nextBoatSide = opposite(state.boatSide);
-            const key = stateKey(result.nextPositions, nextBoatSide);
-            if (visited.has(key)) {
-              return;
-            }
-
-            visited.add(key);
-            queue.push({
-              positions: result.nextPositions,
-              boatSide: nextBoatSide,
-              path: [
-                ...state.path,
-                {
-                  from: SIDE_LABEL[state.boatSide],
-                  to: SIDE_LABEL[nextBoatSide],
-                  passengers: passengers.map((id) => CHARACTER_BY_ID[id].name)
-                }
-              ]
-            });
-          });
-        }
-
-        return null;
-      }
-
-      function runRuleTests() {
-        const testPositions = (leftIds) => {
-          const result = {};
-          CHARACTERS.forEach((character) => {
-            result[character.id] = leftIds.includes(character.id) ? LEFT : RIGHT;
-          });
-          return result;
-        };
-
-        const tests = [
-          {
-            name: "父と娘だけが母なしで同じ岸にいると危険",
-            pass: () => findDangerReasons(testPositions(["father", "sonA", "sonB", "daughterA"])).some((reason) => reason.includes("父と娘A"))
-          },
-          {
-            name: "母と息子だけが父なしで同じ岸にいると危険",
-            pass: () => findDangerReasons(testPositions(["mother", "sonA", "sonB", "daughterA", "daughterB"])).some((reason) => reason.includes("母と息子A・息子B"))
-          },
-          {
-            name: "犬と家族が召使いなしで同じ岸にいると危険",
-            pass: () => findDangerReasons(testPositions(["dog", "sonA"])).some((reason) => reason.includes("犬と息子A"))
-          },
-          {
-            name: "運転役なしの移動は不可",
-            pass: () => !validateMove(createInitialPositions(), LEFT, ["sonA", "daughterA"]).ok
-          },
-          {
-            name: "父と母の初手移動は安全",
-            pass: () => validateMove(createInitialPositions(), LEFT, ["father", "mother"]).ok
-          },
-          {
-            name: "父と娘Aの初手移動は危険で不可",
-            pass: () => !validateMove(createInitialPositions(), LEFT, ["father", "daughterA"]).ok
-          },
-          {
-            name: "全員右岸への解法が存在する",
-            pass: () => Array.isArray(solvePuzzle()) && solvePuzzle().length > 0
-          },
-          {
-            name: "定員オーバーは操作案内でGAME OVERにしない",
-            pass: () => {
-              const result = validateMove(createInitialPositions(), LEFT, ["father", "mother", "servant"]);
-              return !result.ok && result.type === "notice" && result.reasons.includes("ふねには 2人までしか のれない！");
-            }
-          },
-          {
-            name: "初期表示はタイトル画面",
-            pass: () => !elements.titleScreen.hidden && elements.gameScreen.hidden
-          }
-        ];
-
-        const results = tests.map((test) => ({ name: test.name, passed: Boolean(test.pass()) }));
-        const allPassed = results.every((result) => result.passed);
-        console.table(results);
-        console.info(`かわわたりクエスト ルールテスト: ${allPassed ? "PASS" : "FAIL"}`);
-        console.info("確認済み解法:", solvePuzzle());
-        return { allPassed, results, solution: solvePuzzle() };
       }
 
       elements.startButton.addEventListener("click", startGame);
@@ -2268,36 +2056,6 @@
       elements.clearResetButton.addEventListener("click", restartGame);
       elements.endingButton.addEventListener("click", showEnding);
       elements.endingResetButton.addEventListener("click", returnToTitle);
-      elements.titleDevCode.addEventListener("input", (event) => {
-        if (activeScreen !== "title") {
-          return;
-        }
-        const normalized = event.target.value.replace(/\D/g, "").slice(0, ENDING_DEV_CODE.length);
-        event.target.value = normalized;
-        if (normalized.length < ENDING_DEV_CODE.length) {
-          return;
-        }
-        if (!tryOpenEndingWithCode(normalized)) {
-          event.target.value = "";
-        }
-      });
-      elements.titleHeading.addEventListener("click", onTitleSecretTap);
-      window.addEventListener("keydown", onTitleKeydown);
-
-      window.riverQuest = {
-        characters: CHARACTERS,
-        findDangerReasons,
-        validateMove,
-        solvePuzzle,
-        runRuleTests,
-        resetGame,
-        startGame,
-        restartGame,
-        showEnding,
-        returnToTitle,
-        setSoundEnabled,
-        setSelectedBgm
-      };
 
       resetGame();
       updateSoundControls();
@@ -2307,7 +2065,6 @@
         showScreen("title");
       }
       registerServiceWorker();
-      runRuleTests();
     })();
   </script>
 </body>
